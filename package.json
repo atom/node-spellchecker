@@ -1,0 +1,14 @@
+{
+  "main": "./build/Release/nsspellchecker.node",
+  "name": "nsspellchecker",
+  "readme": "README.md",
+  "description": "node bindings to NSSpellChecker",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/atom/node-nsspellchecker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/atom/node-nsspellchecker/issues"
+  },
+}
