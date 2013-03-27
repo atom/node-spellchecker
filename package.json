@@ -1,14 +1,14 @@
 {
-  "main": "./build/Release/nsspellchecker.node",
-  "name": "nsspellchecker",
+  "main": "./build/Release/spellchecker.node",
+  "name": "spellchecker",
   "readme": "README.md",
-  "description": "node bindings to NSSpellChecker",
-  "version": "0.1.1",
+  "description": "node bindings to SpellChecker",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atom/node-nsspellchecker.git"
+    "url": "https://github.com/atom/node-spellchecker.git"
   },
   "bugs": {
-    "url": "https://github.com/atom/node-nsspellchecker/issues"
+    "url": "https://github.com/atom/node-spellchecker/issues"
   }
 }

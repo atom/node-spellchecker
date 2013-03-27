@@ -54,13 +54,3 @@ Handle<Value> GetCorrectionsForMisspelling(const Arguments& args) {
     return scope.Close(result);
   }
 }
-
-void init(Handle<Object> exports) {
-  exports->Set(String::NewSymbol("isMisspelled"),
-      FunctionTemplate::New(IsMisspelled)->GetFunction());
-  exports->Set(String::NewSymbol("getCorrectionsForMisspelling"),
-      FunctionTemplate::New(GetCorrectionsForMisspelling)->GetFunction());
-}
-
-NODE_MODULE(nsspellchecker, init)
-

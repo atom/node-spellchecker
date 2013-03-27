@@ -1,10 +1,8 @@
-# NSSpellChecker Node Module
-
-Native bindings around NSSpellChecker.
+# Node Module for Spell Checking
 
 Install by:
 
 ```bash
-$ npm install nsspellchecker
+$ npm install spellchecker
 ```
 
