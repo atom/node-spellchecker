@@ -1,8 +1,7 @@
 # Node Module for Spell Checking
 
-Install by:
+## Installation
 
 ```bash
-$ npm install spellchecker
+npm install spellchecker
 ```
-
