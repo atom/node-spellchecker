@@ -14,4 +14,3 @@ void init(Handle<Object> exports) {
 }
 
 NODE_MODULE(spellchecker, init)
-
