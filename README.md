@@ -9,7 +9,7 @@ npm install spellchecker
 ## Docs
 
 ```javascript
-SpellChecker = require('spellchecker')
+SpellChecker = require('spellchecker');
 ```
 
 ### SpellChecker.isMisspelled(word)
