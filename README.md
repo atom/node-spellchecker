@@ -18,7 +18,7 @@ Check if a word is misspelled.
 
 `word` - String word to check.
 
-Returns `true` if the word is mispelled, `false` otherwise
+Returns `true` if the word is mispelled, `false` otherwise.
 
 ### SpellChecker.getCorrectionsForMisspelling(word)
 
