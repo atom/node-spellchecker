@@ -8,6 +8,10 @@ npm install spellchecker
 
 ## Docs
 
+```javascript
+SpellChecker = require('spellchecker')
+```
+
 ### SpellChecker.isMisspelled(word)
 
 Check if a word is misspelled.
