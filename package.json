@@ -1,5 +1,5 @@
 {
-  "main": "./build/Release/spellchecker.node",
+  "main": "./lib/spellchecker",
   "name": "spellchecker",
   "readme": "README.md",
   "description": "node bindings to SpellChecker",
@@ -10,5 +10,14 @@
   },
   "bugs": {
     "url": "https://github.com/atom/node-spellchecker/issues"
+  },
+  "scripts": {
+    "test": "jasmine-node --coffee spec/"
+  },
+  "devDependencies": {
+    "jasmine-node": "~1.5.0"
+  },
+  "dependencies": {
+    "bindings": "~1.1.0"
   }
 }
