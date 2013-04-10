@@ -1,5 +1,5 @@
 {
-  "main": "./lib/spellchecker",
+  "main": "./lib/spellchecker.js",
   "name": "spellchecker",
   "readme": "README.md",
   "description": "node bindings to SpellChecker",
