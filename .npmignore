@@ -1,0 +1,5 @@
+build/
+spec/
+.npmignore
+.gitignore
+npm-debug.log
