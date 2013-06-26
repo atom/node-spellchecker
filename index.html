@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>node-spellchecker by atom</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>node-spellchecker</h1>
+        <p>SpellChecker Node Module</p>
+
+        <p class="view"><a href="https://github.com/atom/node-spellchecker">View the Project on GitHub <small>atom/node-spellchecker</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/atom/node-spellchecker/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/atom/node-spellchecker/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/atom/node-spellchecker">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="spellchecker-node-module" class="anchor" href="#spellchecker-node-module"><span class="octicon octicon-link"></span></a>SpellChecker Node Module</h1>
+
+<p>Native bindings to <a href="https://developer.apple.com/library/mac/#documentation/cocoa/reference/ApplicationKit/Classes/NSSpellChecker_Class/Reference/Reference.html">NSSpellChecker</a>.</p>
+
+<h2>
+<a name="installing" class="anchor" href="#installing"><span class="octicon octicon-link"></span></a>Installing</h2>
+
+<div class="highlight"><pre>npm install spellchecker
+</pre></div>
+
+<h2>
+<a name="using" class="anchor" href="#using"><span class="octicon octicon-link"></span></a>Using</h2>
+
+<div class="highlight"><pre><span class="nv">SpellChecker = </span><span class="nx">require</span> <span class="s">'spellchecker'</span>
+</pre></div>
+
+<h3>
+<a name="spellcheckerismisspelledword" class="anchor" href="#spellcheckerismisspelledword"><span class="octicon octicon-link"></span></a>SpellChecker.isMisspelled(word)</h3>
+
+<p>Check if a word is misspelled.</p>
+
+<p><code>word</code> - String word to check.</p>
+
+<p>Returns <code>true</code> if the word is misspelled, <code>false</code> otherwise.</p>
+
+<h3>
+<a name="spellcheckergetcorrectionsformisspellingword" class="anchor" href="#spellcheckergetcorrectionsformisspellingword"><span class="octicon octicon-link"></span></a>SpellChecker.getCorrectionsForMisspelling(word)</h3>
+
+<p>Get the corrections for a misspelled word.</p>
+
+<p><code>word</code> - String word to get corrections for.</p>
+
+<p>Returns a non-null but possibly empty array of string corrections.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/atom">atom</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
