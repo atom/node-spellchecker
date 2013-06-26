@@ -1,7 +1,6 @@
 {
   "main": "./lib/spellchecker.js",
   "name": "spellchecker",
-  "readme": "README.md",
   "description": "node bindings to SpellChecker",
   "version": "0.5.0",
   "licenses": [
