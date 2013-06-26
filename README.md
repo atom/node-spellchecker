@@ -1,4 +1,6 @@
-# Node Module for Spell Checking
+# SpellChecker Node Module
+
+Native module to [NSSpellChecker](https://developer.apple.com/library/mac/#documentation/cocoa/reference/ApplicationKit/Classes/NSSpellChecker_Class/Reference/Reference.html).
 
 ## Installing
 
@@ -6,7 +8,7 @@
 npm install spellchecker
 ```
 
-## Docs
+## Using
 
 ```javascript
 SpellChecker = require('spellchecker');
