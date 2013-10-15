@@ -5,6 +5,9 @@
 
 namespace spellchecker {
 
+void Init(const std::string& dirname) {
+}
+
 bool IsMisspelled(const std::string& word) {
   bool result;
 
