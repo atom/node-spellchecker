@@ -21,7 +21,7 @@
     "test": "jasmine-focused --captureExceptions --coffee spec/"
   },
   "devDependencies": {
-    "jasmine-focused": "~0.7.0"
+    "jasmine-focused": "~0.15.0"
   },
   "dependencies": {
     "bindings": "~1.1.0"

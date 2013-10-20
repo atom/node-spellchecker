@@ -2,4 +2,5 @@ build/
 spec/
 .npmignore
 .gitignore
+.DS_Store
 npm-debug.log
