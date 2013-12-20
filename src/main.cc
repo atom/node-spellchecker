@@ -1,27 +1,29 @@
 #include "spellchecker.h"
 
-#include <node.h>
-#include <node_internals.h>
+#include "nan.h"
 using namespace v8;
 
 namespace {
 
-Handle<Value> PlatformInit(const Arguments& args) {
+NAN_METHOD(PlatformInit) {
+  NanScope();
   spellchecker::Init(*String::Utf8Value(args[0]));
-  return Undefined();
+  NanReturnUndefined();
 }
 
-Handle<Value> IsMisspelled(const Arguments& args) {
+NAN_METHOD(IsMisspelled) {
+  NanScope();
   if (args.Length() < 1)
-    return node::ThrowError("Bad argument");
+    return NanThrowError("Bad argument");
 
   std::string word = *String::Utf8Value(args[0]);
-  return Boolean::New(spellchecker::IsMisspelled(word));
+  NanReturnValue(Boolean::New(spellchecker::IsMisspelled(word)));
 }
 
-Handle<Value> GetCorrectionsForMisspelling(const Arguments& args) {
+NAN_METHOD(GetCorrectionsForMisspelling) {
+  NanScope();
   if (args.Length() < 1)
-    return node::ThrowError("Bad argument");
+    return NanThrowError("Bad argument");
 
   std::string word = *String::Utf8Value(args[0]);
   std::vector<std::string> corrections =
@@ -33,7 +35,7 @@ Handle<Value> GetCorrectionsForMisspelling(const Arguments& args) {
     result->Set(i, String::New(word.data(), word.size()));
   }
 
-  return result;
+  NanReturnValue(result);
 }
 
 void Init(Handle<Object> exports) {
