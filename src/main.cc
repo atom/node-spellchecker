@@ -17,7 +17,7 @@ NAN_METHOD(IsMisspelled) {
     return NanThrowError("Bad argument");
 
   std::string word = *String::Utf8Value(args[0]);
-  NanReturnValue(Boolean::New(spellchecker::IsMisspelled(word)));
+  NanReturnValue(NanNew<Boolean>(spellchecker::IsMisspelled(word)));
 }
 
 NAN_METHOD(GetCorrectionsForMisspelling) {
@@ -29,10 +29,10 @@ NAN_METHOD(GetCorrectionsForMisspelling) {
   std::vector<std::string> corrections =
     spellchecker::GetCorrectionsForMisspelling(word);
 
-  Local<Array> result = Array::New(corrections.size());
+  Local<Array> result = NanNew<Array>(corrections.size());
   for (size_t i = 0; i < corrections.size(); ++i) {
     const std::string& word = corrections[i];
-    result->Set(i, String::New(word.data(), word.size()));
+    result->Set(i, NanNew<String>(word.data(), word.size()));
   }
 
   NanReturnValue(result);
