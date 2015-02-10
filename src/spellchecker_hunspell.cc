@@ -1,4 +1,4 @@
-#include "spellchecker.h"
+#include "spellchecker_hunspell.h"
 
 #include "../vendor/hunspell/src/hunspell/hunspell.hxx"
 
@@ -10,7 +10,7 @@ Hunspell* g_hunspell = NULL;
 
 }  // namespace
 
-void Init(const std::string& dirname) {
+void HunspellSpellchecker::SetDictionaryDirectory(const std::string& dirname) {
   if (g_hunspell != NULL)
     return;
 
@@ -19,11 +19,11 @@ void Init(const std::string& dirname) {
   g_hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
 }
 
-bool IsMisspelled(const std::string& word) {
+bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
   return g_hunspell->spell(word.c_str()) == 0;
 }
 
-std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word) {
+std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   std::vector<std::string> corrections;
   char** slist;
   int size = g_hunspell->suggest(&slist, word.c_str());
