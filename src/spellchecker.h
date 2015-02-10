@@ -6,14 +6,16 @@
 
 namespace spellchecker {
 
-// Initializes everything.
-void Init(const std::string& dirname);
+class SpellcheckerImplementation {
+public:
+  virtual void SetDictionaryDirectory(const std::string& path) = 0;
 
-// Returns true if the word is misspelled.
-bool IsMisspelled(const std::string& word);
+  // Returns an array containing possible corrections for the word.
+  virtual std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word) = 0;
 
-// Returns an array containing possible corrections for the word.
-std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
+  // Returns true if the word is misspelled.
+  virtual bool IsMisspelled(const std::string& word) = 0;
+};
 
 }  // namespace spellchecker
 
