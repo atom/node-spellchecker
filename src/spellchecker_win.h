@@ -1,6 +1,7 @@
 #ifndef SRC_SPELLCHECKER_WIN_H_
 #define SRC_SPELLCHECKER_WIN_H_
 
+#include <spellcheck.h>
 #include "spellchecker.h"
 
 namespace spellchecker {
@@ -12,7 +13,7 @@ public:
   WindowsSpellchecker();
   ~WindowsSpellchecker();
 
-  void SetDictionary(const std::string& language, const std::string& path);
+  bool SetDictionary(const std::string& language, const std::string& path);
   std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
   bool IsMisspelled(const std::string& word);
 };

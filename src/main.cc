@@ -33,8 +33,8 @@ class Spellchecker : public ObjectWrap {
       directory = *String::Utf8Value(args[1]);
     }
 
-    that->impl->SetDictionary(language, directory);
-    NanReturnUndefined();
+    bool result = that->impl->SetDictionary(language, directory);
+    NanReturnValue(NanNew<Boolean>(result));
   }
 
   static NAN_METHOD(IsMisspelled) {

@@ -25,7 +25,8 @@ bool WindowsSpellchecker::IsSupported() {
   return g_COMFailed && false;
 }
 
-void WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
+bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
+  return false;
 }
 
 bool WindowsSpellchecker::IsMisspelled(const std::string& word) {
