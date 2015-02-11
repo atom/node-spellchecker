@@ -7,7 +7,10 @@ namespace spellchecker {
 
 class WindowsSpellchecker : public SpellcheckerImplementation {
 public:
-  static bool IsSupported();
+  bool IsSupported();
+
+  WindowsSpellchecker();
+  ~WindowsSpellchecker();
 
   void SetDictionary(const std::string& language, const std::string& path);
   std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
