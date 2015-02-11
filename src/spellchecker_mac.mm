@@ -47,4 +47,8 @@ std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std
   return corrections;
 }
 
+SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker() {
+  return new MacSpellchecker();
+}
+
 }  // namespace spellchecker

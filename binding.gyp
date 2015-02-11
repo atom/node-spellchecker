@@ -34,6 +34,16 @@
             'src/spellchecker_hunspell.cc',
           ],
         }],
+        ['OS=="win"', {
+          'sources': [
+             'src/spellchecker_win.cc'
+          ],
+        }],
+        ['OS=="linux"', {
+          'sources': [
+             'src/spellchecker_linux.cc'
+          ],
+        }],
         ['OS=="mac" and spellchecker_use_hunspell=="false"', {
           'sources': [
             'src/spellchecker_mac.mm',

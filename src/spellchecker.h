@@ -19,6 +19,11 @@ public:
   virtual ~SpellcheckerImplementation() {}
 };
 
+class SpellcheckerFactory {
+public:
+  static SpellcheckerImplementation* CreateSpellchecker();
+};
+
 }  // namespace spellchecker
 
 #endif  // SRC_SPELLCHECKER_H_

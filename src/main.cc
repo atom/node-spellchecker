@@ -1,6 +1,5 @@
 #include "nan.h"
 #include "spellchecker.h"
-#include "spellchecker_hunspell.h"
 
 using node::ObjectWrap;
 using namespace spellchecker;
@@ -72,8 +71,7 @@ class Spellchecker : public ObjectWrap {
   }
 
   Spellchecker() {
-    // TODO: Set impl
-    impl = new HunspellSpellchecker();
+    impl = SpellcheckerFactory::CreateSpellchecker();
   }
 
   // actual destructor
