@@ -16,7 +16,7 @@ public:
   // Returns true if the word is misspelled.
   virtual bool IsMisspelled(const std::string& word) = 0;
 
-  virtual ~SpellcheckerImplementation();
+  virtual ~SpellcheckerImplementation() {}
 };
 
 }  // namespace spellchecker
