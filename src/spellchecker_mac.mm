@@ -5,7 +5,8 @@
 
 namespace spellchecker {
 
-void MacSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
+bool MacSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
+  return true;
 }
 
 bool MacSpellchecker::IsMisspelled(const std::string& word) {
