@@ -10,7 +10,7 @@ Hunspell* g_hunspell = NULL;
 
 }  // namespace
 
-void HunspellSpellchecker::SetDictionaryDirectory(const std::string& dirname) {
+void HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
   if (g_hunspell != NULL)
     return;
 

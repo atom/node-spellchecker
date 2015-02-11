@@ -19,7 +19,7 @@ class Spellchecker : public ObjectWrap {
     NanReturnValue(args.This());
   }
 
-  static NAN_METHOD(SetDictionaryDirectory) {
+  static NAN_METHOD(SetDictionary) {
     NanScope();
 
     if (args.Length() < 1) {
@@ -27,8 +27,14 @@ class Spellchecker : public ObjectWrap {
     }
 
     Spellchecker* that = ObjectWrap::Unwrap<Spellchecker>(args.Holder());
-    std::string directory = *String::Utf8Value(args[0]);
-    that->impl->SetDictionaryDirectory(directory);
+
+    std::string language = *String::Utf8Value(args[0]);
+    std::string directory = "";
+    if (args.Length() > 1) {
+      directory = *String::Utf8Value(args[1]);
+    }
+
+    that->impl->SetDictionary(language, directory);
     NanReturnUndefined();
   }
 
@@ -82,7 +88,7 @@ class Spellchecker : public ObjectWrap {
     tpl->SetClassName(NanSymbol("Spellchecker"));
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-    NODE_SET_METHOD(tpl->InstanceTemplate(), "setDictionaryDirectory", Spellchecker::SetDictionaryDirectory);
+    NODE_SET_METHOD(tpl->InstanceTemplate(), "setDictionary", Spellchecker::SetDictionary);
     NODE_SET_METHOD(tpl->InstanceTemplate(), "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);
     NODE_SET_METHOD(tpl->InstanceTemplate(), "isMisspelled", Spellchecker::IsMisspelled);
 
