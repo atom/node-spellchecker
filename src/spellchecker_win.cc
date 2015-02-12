@@ -1,9 +1,17 @@
 #include <windows.h>
+#include <guiddef.h>
+#include <initguid.h>
+#include <string>
 #include <spellcheck.h>
 
 #include "spellchecker.h"
 #include "spellchecker_win.h"
 #include "spellchecker_hunspell.h"
+
+// NB: No idea why I have to define this myself, you don't have to in a
+// standard console app.
+DEFINE_GUID(CLSID_SpellCheckerFactory,0x7AB36653,0x1796,0x484B,0xBD,0xFA,0xE7,0x4F,0x1D,0xB7,0xC1,0xDC);
+DEFINE_GUID(IID_ISpellCheckerFactory,0x8E018A9D,0x2415,0x4677,0xBF,0x08,0x79,0x4E,0xA6,0x1F,0x94,0xBB);
 
 namespace spellchecker {
 
