@@ -1,38 +1,44 @@
-#include "spellchecker.h"
-
 #include "../vendor/hunspell/src/hunspell/hunspell.hxx"
+
+#include "spellchecker_hunspell.h"
 
 namespace spellchecker {
 
-namespace {
-
-Hunspell* g_hunspell = NULL;
-
-}  // namespace
-
-void Init(const std::string& dirname) {
-  if (g_hunspell != NULL)
-    return;
-
-  std::string affixpath = dirname + "/../vendor/hunspell_dictionaries/en_US.aff";
-  std::string dpath = dirname + "/../vendor/hunspell_dictionaries/en_US.dic";
-  g_hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
+HunspellSpellchecker::HunspellSpellchecker() {
+  this->hunspell = NULL;
 }
 
-bool IsMisspelled(const std::string& word) {
-  return g_hunspell->spell(word.c_str()) == 0;
+HunspellSpellchecker::~HunspellSpellchecker() {
+  if (!this->hunspell) return;
+
+  delete this->hunspell;
 }
 
-std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word) {
+void HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
+  if (hunspell != NULL) {
+    delete this->hunspell;
+  }
+
+  std::string affixpath = dirname + "/" + language + ".aff";
+  std::string dpath = dirname + "/" + language + ".dic";
+  this->hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
+}
+
+bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
+  return this->hunspell->spell(word.c_str()) == 0;
+}
+
+std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   std::vector<std::string> corrections;
   char** slist;
-  int size = g_hunspell->suggest(&slist, word.c_str());
+  int size = hunspell->suggest(&slist, word.c_str());
 
   corrections.reserve(size);
-  for (int i = 0; i < size; ++i)
+  for (int i = 0; i < size; ++i) {
     corrections.push_back(slist[i]);
+  }
 
-  g_hunspell->free_list(&slist, size);
+  this->hunspell->free_list(&slist, size);
   return corrections;
 }
 

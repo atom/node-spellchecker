@@ -1,14 +1,14 @@
-#include "spellchecker.h"
+#include "spellchecker_mac.h"
 
 #import <Cocoa/Cocoa.h>
 #import <dispatch/dispatch.h>
 
 namespace spellchecker {
 
-void Init(const std::string& dirname) {
+void MacSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
 }
 
-bool IsMisspelled(const std::string& word) {
+bool MacSpellchecker::IsMisspelled(const std::string& word) {
   bool result;
 
   @autoreleasepool {
@@ -23,7 +23,7 @@ bool IsMisspelled(const std::string& word) {
   return result;
 }
 
-std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word) {
+std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   std::vector<std::string> corrections;
 
   @autoreleasepool {
@@ -45,6 +45,10 @@ std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word) {
     }
   }
   return corrections;
+}
+
+SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker() {
+  return new MacSpellchecker();
 }
 
 }  // namespace spellchecker
