@@ -109,6 +109,33 @@ bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::
   return true;
 }
 
+std::vector<std::string> WindowsSpellchecker::GetAvailableDictionaries(const std::string& path) {
+  HRESULT hr;
+
+  if (!this->spellcheckerFactory) {
+    return std::vector<std::string>();
+  }
+
+  IEnumString* langList;
+  if (FAILED(hr = this->spellcheckerFactory->get_SupportedLanguages(&langList))) {
+    return std::vector<std::string>();
+  }
+
+  std::vector<std::string> ret;
+  LPOLESTR str;
+  while (langList->Next(1, &str, NULL) == S_OK) {
+    std::wstring wlang;
+    wlang.assign(str);
+    ret.push_back(ToUTF8(wlang));
+
+    CoTaskMemFree(str);
+  }
+
+  langList->Release();
+  return ret;
+}
+
+
 bool WindowsSpellchecker::IsMisspelled(const std::string& word) {
   if (this->currentSpellchecker == NULL) {
     return false;
