@@ -23,6 +23,7 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language, const std:
   std::string affixpath = dirname + "/" + language + ".aff";
   std::string dpath = dirname + "/" + language + ".dic";
 
+  // TODO: This code is almost certainly jacked on Win32 for non-ASCII paths
   FILE* handle = fopen(dpath.c_str(), "r");
   if (!handle) {
     return false;
@@ -31,6 +32,10 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language, const std:
   fclose(handle);
   this->hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
   return true;
+}
+
+std::vector<std::string> HunspellSpellchecker::GetAvailableDictionaries(const std::string& path) {
+  return std::vector<std::string>();
 }
 
 bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
