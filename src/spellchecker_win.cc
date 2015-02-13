@@ -87,6 +87,10 @@ bool WindowsSpellchecker::IsSupported() {
 bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
   HRESULT hr;
 
+  if (!this->spellcheckerFactory) {
+    return false;
+  }
+
   if (this->currentSpellchecker != NULL) {
     this->currentSpellchecker->Release();
     this->currentSpellchecker = NULL;
