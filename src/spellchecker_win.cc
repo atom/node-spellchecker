@@ -27,7 +27,8 @@ std::string ToUTF8(const std::wstring& string) {
   // to 4 bytes in UTF8.
   int cbLen = (string.length()+1) * sizeof(char) * 4;
   char* buf = new char[cbLen];
-  WideCharToMultiByte(CP_UTF8, 0, string.c_str(), string.length(), buf, cbLen, NULL, NULL);
+  int retLen = WideCharToMultiByte(CP_UTF8, 0, string.c_str(), string.length(), buf, cbLen, NULL, NULL);
+  buf[retLen] = 0;
 
   std::string ret;
   ret.assign(buf);
@@ -43,7 +44,8 @@ std::wstring ToWString(const std::string& string) {
   // surrogate pair
   int cchLen = (string.length()+1) * 2;
   wchar_t* buf = new wchar_t[cchLen];
-  MultiByteToWideChar(CP_UTF8, 0, string.c_str(), strlen(string.c_str()), buf, cchLen);
+  int retLen = MultiByteToWideChar(CP_UTF8, 0, string.c_str(), strlen(string.c_str()), buf, cchLen);
+  buf[retLen] = 0;
 
   std::wstring ret;
   ret.assign(buf);
@@ -55,7 +57,7 @@ WindowsSpellchecker::WindowsSpellchecker() {
 
   if (InterlockedIncrement(&g_COMRefcount) == 1) {
     g_COMFailed = FAILED(CoInitialize(NULL));
-    return;
+    if (g_COMFailed) return;
   }
 
   // NB: This will fail on < Win8
@@ -83,6 +85,8 @@ bool WindowsSpellchecker::IsSupported() {
 }
 
 bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
+  HRESULT hr;
+
   if (this->currentSpellchecker != NULL) {
     this->currentSpellchecker->Release();
     this->currentSpellchecker = NULL;
@@ -164,8 +168,7 @@ std::vector<std::string> WindowsSpellchecker::GetCorrectionsForMisspelling(const
   std::vector<std::string> ret;
 
   LPOLESTR correction;
-  ULONG dontcare;
-  while (words->Next(1, &correction, &dontcare)) {
+  while (words->Next(1, &correction, NULL) == S_OK) {
     std::wstring wcorr;
     wcorr.assign(correction);
     ret.push_back(ToUTF8(wcorr));
