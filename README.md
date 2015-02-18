@@ -1,4 +1,4 @@
-# SpellChecker Node Module
+# SpellChecker Node Module [![Build Status](https://travis-ci.org/atom/node-spellchecker.svg?branch=master)](https://travis-ci.org/atom/node-spellchecker)
 
 Native bindings to [NSSpellChecker](https://developer.apple.com/library/mac/#documentation/cocoa/reference/ApplicationKit/Classes/NSSpellChecker_Class/Reference/Reference.html).
 
