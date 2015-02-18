@@ -4,3 +4,5 @@ spec/
 .gitignore
 .DS_Store
 npm-debug.log
+appveyor.yml
+.travis.yml
