@@ -12,7 +12,8 @@ public:
   HunspellSpellchecker();
   ~HunspellSpellchecker();
 
-  void SetDictionary(const std::string& language, const std::string& path);
+  bool SetDictionary(const std::string& language, const std::string& path);
+  std::vector<std::string> GetAvailableDictionaries(const std::string& path);
   std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
   bool IsMisspelled(const std::string& word);
 

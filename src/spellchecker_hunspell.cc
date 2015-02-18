@@ -1,5 +1,5 @@
+#include <cstdio>
 #include "../vendor/hunspell/src/hunspell/hunspell.hxx"
-
 #include "spellchecker_hunspell.h"
 
 namespace spellchecker {
@@ -14,14 +14,28 @@ HunspellSpellchecker::~HunspellSpellchecker() {
   delete this->hunspell;
 }
 
-void HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
+bool HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
   if (hunspell != NULL) {
     delete this->hunspell;
+    hunspell = NULL;
   }
 
   std::string affixpath = dirname + "/" + language + ".aff";
   std::string dpath = dirname + "/" + language + ".dic";
+
+  // TODO: This code is almost certainly jacked on Win32 for non-ASCII paths
+  FILE* handle = fopen(dpath.c_str(), "r");
+  if (!handle) {
+    return false;
+  }
+
+  fclose(handle);
   this->hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
+  return true;
+}
+
+std::vector<std::string> HunspellSpellchecker::GetAvailableDictionaries(const std::string& path) {
+  return std::vector<std::string>();
 }
 
 bool HunspellSpellchecker::IsMisspelled(const std::string& word) {

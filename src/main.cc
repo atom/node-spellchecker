@@ -33,8 +33,8 @@ class Spellchecker : public ObjectWrap {
       directory = *String::Utf8Value(args[1]);
     }
 
-    that->impl->SetDictionary(language, directory);
-    NanReturnUndefined();
+    bool result = that->impl->SetDictionary(language, directory);
+    NanReturnValue(NanNew<Boolean>(result));
   }
 
   static NAN_METHOD(IsMisspelled) {
@@ -48,6 +48,29 @@ class Spellchecker : public ObjectWrap {
 
     NanReturnValue(NanNew<Boolean>(that->impl->IsMisspelled(word)));
   }
+
+  static NAN_METHOD(GetAvailableDictionaries) {
+    NanScope();
+
+    Spellchecker* that = ObjectWrap::Unwrap<Spellchecker>(args.Holder());
+
+    std::string path = ".";
+    if (args.Length() > 0) {
+      std::string path = *String::Utf8Value(args[0]);
+    }
+
+    std::vector<std::string> dictionaries =
+      that->impl->GetAvailableDictionaries(path);
+
+    Local<Array> result = NanNew<Array>(dictionaries.size());
+    for (size_t i = 0; i < dictionaries.size(); ++i) {
+      const std::string& dict = dictionaries[i];
+      result->Set(i, NanNew<String>(dict.data(), dict.size()));
+    }
+
+    NanReturnValue(result);
+  }
+
 
   static NAN_METHOD(GetCorrectionsForMisspelling) {
     NanScope();
@@ -87,6 +110,7 @@ class Spellchecker : public ObjectWrap {
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     NODE_SET_METHOD(tpl->InstanceTemplate(), "setDictionary", Spellchecker::SetDictionary);
+    NODE_SET_METHOD(tpl->InstanceTemplate(), "getAvailableDictionaries", Spellchecker::GetAvailableDictionaries);
     NODE_SET_METHOD(tpl->InstanceTemplate(), "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);
     NODE_SET_METHOD(tpl->InstanceTemplate(), "isMisspelled", Spellchecker::IsMisspelled);
 
