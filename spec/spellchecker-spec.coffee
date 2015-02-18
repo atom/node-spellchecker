@@ -19,3 +19,13 @@ describe "SpellChecker", ->
 
     it "throws an exception when no word specified", ->
       expect(-> SpellChecker.getCorrectionsForMisspelling()).toThrow()
+
+  describe ".getAvailableDictionaries()", ->
+    it "returns an array of string dictionary names", ->
+      dictionaries = SpellChecker.getAvailableDictionaries()
+      expect(Array.isArray(dictionaries)).toBe true
+      expect(dictionaries.length).toBeGreaterThan 0
+
+      for dictionary in dictionaries.length
+        expect(typeof dictionary).toBe 'string'
+        expect(diction.length).toBeGreaterThan 0
