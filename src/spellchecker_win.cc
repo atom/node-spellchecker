@@ -2,6 +2,7 @@
 #include <guiddef.h>
 #include <initguid.h>
 #include <string>
+#include <algorithm>
 #include <cstdlib>
 #include <spellcheck.h>
 
@@ -96,7 +97,12 @@ bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::
   }
 
   // Figure out if we have a dictionary installed for the language they want
-  std::wstring wlanguage = ToWString(language);
+  // NB: Hunspell uses underscore to separate language and locale, and Win8 uses
+  // dash - if they use the wrong one, just silently replace it for them
+  std::string lang = language;
+  std::replace(lang.begin(), lang.end(), '_', '-');
+
+  std::wstring wlanguage = ToWString(lang);
   BOOL isSupported;
 
   if (FAILED(this->spellcheckerFactory->IsSupported(wlanguage.c_str(), &isSupported))) {
