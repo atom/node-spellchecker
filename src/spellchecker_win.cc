@@ -2,6 +2,7 @@
 #include <guiddef.h>
 #include <initguid.h>
 #include <string>
+#include <cstdlib>
 #include <spellcheck.h>
 
 #include "spellchecker.h"
@@ -211,7 +212,7 @@ std::vector<std::string> WindowsSpellchecker::GetCorrectionsForMisspelling(const
 
 SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker() {
   WindowsSpellchecker* ret = new WindowsSpellchecker();
-  if (ret->IsSupported()) {
+  if (ret->IsSupported() && getenv("SPELLCHECKER_PREFER_HUNSPELL") == NULL) {
     return ret;
   }
 
