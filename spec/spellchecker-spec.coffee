@@ -19,3 +19,16 @@ describe "SpellChecker", ->
 
     it "throws an exception when no word specified", ->
       expect(-> SpellChecker.getCorrectionsForMisspelling()).toThrow()
+
+  describe ".getAvailableDictionaries()", ->
+    it "returns an array of string dictionary names", ->
+      dictionaries = SpellChecker.getAvailableDictionaries()
+      expect(Array.isArray(dictionaries)).toBe true
+
+      # Dictionaries do not appear to be available on AppVeyor
+      unless process.platform is 'win32' and process.env.CI
+        expect(dictionaries.length).toBeGreaterThan 0
+
+      for dictionary in dictionaries.length
+        expect(typeof dictionary).toBe 'string'
+        expect(diction.length).toBeGreaterThan 0

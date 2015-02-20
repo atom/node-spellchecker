@@ -3,7 +3,7 @@ environment:
 
 install:
   - ps: Install-Product node $env:nodejs_version
-  - npm install
+  - npm --msvs_version=2013 install
 
 test_script:
   - node --version

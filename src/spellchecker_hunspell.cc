@@ -1,5 +1,6 @@
+#include <cstdio>
+#include <algorithm>
 #include "../vendor/hunspell/src/hunspell/hunspell.hxx"
-
 #include "spellchecker_hunspell.h"
 
 namespace spellchecker {
@@ -14,14 +15,33 @@ HunspellSpellchecker::~HunspellSpellchecker() {
   delete this->hunspell;
 }
 
-void HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
+bool HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
   if (hunspell != NULL) {
     delete this->hunspell;
+    hunspell = NULL;
   }
 
-  std::string affixpath = dirname + "/" + language + ".aff";
-  std::string dpath = dirname + "/" + language + ".dic";
+  // NB: Hunspell uses underscore to separate language and locale, and Win8 uses
+  // dash - if they use the wrong one, just silently replace it for them
+  std::string lang = language;
+  std::replace(lang.begin(), lang.end(), '-', '_');
+
+  std::string affixpath = dirname + "/" + lang + ".aff";
+  std::string dpath = dirname + "/" + lang + ".dic";
+
+  // TODO: This code is almost certainly jacked on Win32 for non-ASCII paths
+  FILE* handle = fopen(dpath.c_str(), "r");
+  if (!handle) {
+    return false;
+  }
+
+  fclose(handle);
   this->hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
+  return true;
+}
+
+std::vector<std::string> HunspellSpellchecker::GetAvailableDictionaries(const std::string& path) {
+  return std::vector<std::string>();
 }
 
 bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
