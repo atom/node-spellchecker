@@ -83,7 +83,7 @@ class Spellchecker : public ObjectWrap {
   static void Init(Handle<Object> exports) {
     Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(Spellchecker::New);
 
-    tpl->SetClassName(NanSymbol("Spellchecker"));
+    tpl->SetClassName(NanNew<String>("Spellchecker"));
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     NODE_SET_METHOD(tpl->InstanceTemplate(), "setDictionary", Spellchecker::SetDictionary);
