@@ -20,6 +20,12 @@ describe "SpellChecker", ->
     it "throws an exception when no word specified", ->
       expect(-> SpellChecker.getCorrectionsForMisspelling()).toThrow()
 
+  describe ".add(word)", ->
+    it "allows words to be added to the dictionary", ->
+      expect(SpellChecker.isMisspelled('wwoorrdd')).toBe true
+      SpellChecker.add('wwoorrdd')
+      expect(SpellChecker.isMisspelled('wwoorrdd')).toBe false
+
   describe ".getAvailableDictionaries()", ->
     it "returns an array of string dictionary names", ->
       dictionaries = SpellChecker.getAvailableDictionaries()
