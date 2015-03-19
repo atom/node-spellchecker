@@ -51,6 +51,13 @@ bool MacSpellchecker::IsMisspelled(const std::string& word) {
   return result;
 }
 
+void MacSpellchecker::Add(const std::string& word) {
+  @autoreleasepool {
+    NSString* newWord = [NSString stringWithUTF8String:word.c_str()];
+    [this->spellChecker learnWord:newWord];
+  }
+}
+
 std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   std::vector<std::string> corrections;
 

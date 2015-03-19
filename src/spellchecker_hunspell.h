@@ -16,6 +16,7 @@ public:
   std::vector<std::string> GetAvailableDictionaries(const std::string& path);
   std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
   bool IsMisspelled(const std::string& word);
+  void Add(const std::string& word);
 
 private:
   Hunspell* hunspell;

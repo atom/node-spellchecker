@@ -48,6 +48,10 @@ bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
   return this->hunspell->spell(word.c_str()) == 0;
 }
 
+void HunspellSpellchecker::Add(const std::string& word) {
+  this->hunspell->add(word.c_str());
+}
+
 std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   std::vector<std::string> corrections;
   char** slist;

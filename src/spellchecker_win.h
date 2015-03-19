@@ -18,6 +18,7 @@ public:
 
   std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
   bool IsMisspelled(const std::string& word);
+  void Add(const std::string& word);
 
 private:
   ISpellChecker* currentSpellchecker;
