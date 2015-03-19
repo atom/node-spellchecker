@@ -26,6 +26,14 @@ describe "SpellChecker", ->
       SpellChecker.add('wwoorrdd')
       expect(SpellChecker.isMisspelled('wwoorrdd')).toBe false
 
+    it "throws an error if no word is specified", ->
+      errorOccurred = false
+      try
+        Spellchecker.add()
+      catch
+        errorOccurred = true
+      expect(errorOccurred).toBe true
+
   describe ".getAvailableDictionaries()", ->
     it "returns an array of string dictionary names", ->
       dictionaries = SpellChecker.getAvailableDictionaries()
