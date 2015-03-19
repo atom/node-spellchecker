@@ -2,7 +2,7 @@
   "main": "./lib/spellchecker.js",
   "name": "spellchecker",
   "description": "Bindings to native spellchecker",
-  "version": "2.2.0",
+  "version": "2.1.0",
   "licenses": [
     {
       "type": "MIT",
