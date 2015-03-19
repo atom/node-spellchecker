@@ -49,6 +49,18 @@ class Spellchecker : public ObjectWrap {
     NanReturnValue(NanNew(that->impl->IsMisspelled(word)));
   }
 
+  static NAN_METHOD(Add) {
+    NanScope();
+    if (args.Length() < 1) {
+      return NanThrowError("Bad argument");
+    }
+
+    Spellchecker* that = ObjectWrap::Unwrap<Spellchecker>(args.Holder());
+    std::string word = *String::Utf8Value(args[0]);
+
+    that->impl->Add(word);
+  }
+
   static NAN_METHOD(GetAvailableDictionaries) {
     NanScope();
 
@@ -70,7 +82,6 @@ class Spellchecker : public ObjectWrap {
 
     NanReturnValue(result);
   }
-
 
   static NAN_METHOD(GetCorrectionsForMisspelling) {
     NanScope();
@@ -113,6 +124,7 @@ class Spellchecker : public ObjectWrap {
     NODE_SET_METHOD(tpl->InstanceTemplate(), "getAvailableDictionaries", Spellchecker::GetAvailableDictionaries);
     NODE_SET_METHOD(tpl->InstanceTemplate(), "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);
     NODE_SET_METHOD(tpl->InstanceTemplate(), "isMisspelled", Spellchecker::IsMisspelled);
+    NODE_SET_METHOD(tpl->InstanceTemplate(), "add", Spellchecker::Add);
 
     exports->Set(NanNew("Spellchecker"), tpl->GetFunction());
   }
