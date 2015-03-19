@@ -33,8 +33,8 @@ Returns a non-null but possibly empty array of string corrections.
 ### SpellChecker.add(word)
 
 Adds a word to the dictionary.
-When using Hunspell, this will not modify the .dic file; custom words must be added each time the spellchecker is created. Use a custom dictionary file.
+When using Hunspell, this will not modify the .dic file; new words must be added each time the spellchecker is created. Use a custom dictionary file.
 
-`word` - String word to add
+`word` - String word to add.
 
 Returns nothing.

@@ -59,6 +59,7 @@ class Spellchecker : public ObjectWrap {
     std::string word = *String::Utf8Value(args[0]);
 
     that->impl->Add(word);
+    NanReturnUndefined();
   }
 
   static NAN_METHOD(GetAvailableDictionaries) {
