@@ -144,7 +144,6 @@ std::vector<std::string> WindowsSpellchecker::GetAvailableDictionaries(const std
   return ret;
 }
 
-
 bool WindowsSpellchecker::IsMisspelled(const std::string& word) {
   if (this->currentSpellchecker == NULL) {
     return false;
@@ -179,6 +178,15 @@ bool WindowsSpellchecker::IsMisspelled(const std::string& word) {
 
   errors->Release();
   return ret;
+}
+
+void WindowsSpellchecker::Add(const std::string& word) {
+  if (this->currentSpellchecker == NULL) {
+    return;
+  }
+
+  std::wstring wword = ToWString(word);
+  this->currentSpellchecker->Add(wword.c_str());
 }
 
 std::vector<std::string> WindowsSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {

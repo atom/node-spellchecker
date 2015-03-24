@@ -17,6 +17,11 @@ public:
   // Returns true if the word is misspelled.
   virtual bool IsMisspelled(const std::string& word) = 0;
 
+  // Adds a new word to the dictionary.
+  // NB: When using Hunspell, this will not modify the .dic file; custom words must be added each
+  // time the spellchecker is created. Use a custom dictionary file.
+  virtual void Add(const std::string& word) = 0;
+
   virtual ~SpellcheckerImplementation() {}
 };
 
