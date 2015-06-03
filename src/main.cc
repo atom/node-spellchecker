@@ -88,7 +88,7 @@ class Spellchecker : public ObjectWrap {
     std::vector<std::string> corrections =
       that->impl->GetCorrectionsForMisspelling(word);
 
-    Local<Array> result = NanNew<Array>(corrections.size());
+    Handle<Array> result = NanNew<Array>(corrections.size());
     for (size_t i = 0; i < corrections.size(); ++i) {
       const std::string& word = corrections[i];
       result->Set(i, NanNew<String>(word.data(), word.size()));
