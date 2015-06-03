@@ -11,7 +11,6 @@ class Spellchecker : public ObjectWrap {
   SpellcheckerImplementation* impl;
 
   static NAN_METHOD(New) {
-    NanScope();
     Spellchecker* that = new Spellchecker();
     that->Wrap(args.This());
 
@@ -19,8 +18,6 @@ class Spellchecker : public ObjectWrap {
   }
 
   static NAN_METHOD(SetDictionary) {
-    NanScope();
-
     if (args.Length() < 1) {
       return NanThrowError("Bad argument");
     }
@@ -34,11 +31,10 @@ class Spellchecker : public ObjectWrap {
     }
 
     bool result = that->impl->SetDictionary(language, directory);
-    NanReturnValue(NanNew(result));
+    NanReturnValue(NanNew<Boolean>(result));
   }
 
   static NAN_METHOD(IsMisspelled) {
-    NanScope();
     if (args.Length() < 1) {
       return NanThrowError("Bad argument");
     }
@@ -46,11 +42,10 @@ class Spellchecker : public ObjectWrap {
     Spellchecker* that = ObjectWrap::Unwrap<Spellchecker>(args.Holder());
     std::string word = *String::Utf8Value(args[0]);
 
-    NanReturnValue(NanNew(that->impl->IsMisspelled(word)));
+    NanReturnValue(NanNew<Boolean>(that->impl->IsMisspelled(word)));
   }
 
   static NAN_METHOD(Add) {
-    NanScope();
     if (args.Length() < 1) {
       return NanThrowError("Bad argument");
     }
@@ -63,8 +58,6 @@ class Spellchecker : public ObjectWrap {
   }
 
   static NAN_METHOD(GetAvailableDictionaries) {
-    NanScope();
-
     Spellchecker* that = ObjectWrap::Unwrap<Spellchecker>(args.Holder());
 
     std::string path = ".";
@@ -75,17 +68,16 @@ class Spellchecker : public ObjectWrap {
     std::vector<std::string> dictionaries =
       that->impl->GetAvailableDictionaries(path);
 
-    Local<Array> result = NanNew<Array>(dictionaries.size());
+    Handle<Array> result = NanNew<Array>(dictionaries.size());
     for (size_t i = 0; i < dictionaries.size(); ++i) {
       const std::string& dict = dictionaries[i];
-      result->Set(i, NanNew(dict.data(), dict.size()));
+      result->Set(i, NanNew<String>(dict.data(), dict.size()));
     }
 
     NanReturnValue(result);
   }
 
   static NAN_METHOD(GetCorrectionsForMisspelling) {
-    NanScope();
     if (args.Length() < 1) {
       return NanThrowError("Bad argument");
     }
@@ -96,7 +88,7 @@ class Spellchecker : public ObjectWrap {
     std::vector<std::string> corrections =
       that->impl->GetCorrectionsForMisspelling(word);
 
-    Local<Array> result = NanNew<Array>(corrections.size());
+    Handle<Array> result = NanNew<Array>(corrections.size());
     for (size_t i = 0; i < corrections.size(); ++i) {
       const std::string& word = corrections[i];
       result->Set(i, NanNew<String>(word.data(), word.size()));
