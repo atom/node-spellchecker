@@ -31,7 +31,7 @@ class Spellchecker : public ObjectWrap {
     }
 
     bool result = that->impl->SetDictionary(language, directory);
-    NanReturnValue(NanNew(result));
+    NanReturnValue(NanNew<Boolean>(result));
   }
 
   static NAN_METHOD(IsMisspelled) {
@@ -42,7 +42,7 @@ class Spellchecker : public ObjectWrap {
     Spellchecker* that = ObjectWrap::Unwrap<Spellchecker>(args.Holder());
     std::string word = *String::Utf8Value(args[0]);
 
-    NanReturnValue(NanNew(that->impl->IsMisspelled(word)));
+    NanReturnValue(NanNew<Boolean>(that->impl->IsMisspelled(word)));
   }
 
   static NAN_METHOD(Add) {
