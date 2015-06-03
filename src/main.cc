@@ -11,7 +11,6 @@ class Spellchecker : public ObjectWrap {
   SpellcheckerImplementation* impl;
 
   static NAN_METHOD(New) {
-    NanScope();
     Spellchecker* that = new Spellchecker();
     that->Wrap(args.This());
 
@@ -19,8 +18,6 @@ class Spellchecker : public ObjectWrap {
   }
 
   static NAN_METHOD(SetDictionary) {
-    NanScope();
-
     if (args.Length() < 1) {
       return NanThrowError("Bad argument");
     }
@@ -38,7 +35,6 @@ class Spellchecker : public ObjectWrap {
   }
 
   static NAN_METHOD(IsMisspelled) {
-    NanScope();
     if (args.Length() < 1) {
       return NanThrowError("Bad argument");
     }
@@ -50,7 +46,6 @@ class Spellchecker : public ObjectWrap {
   }
 
   static NAN_METHOD(Add) {
-    NanScope();
     if (args.Length() < 1) {
       return NanThrowError("Bad argument");
     }
@@ -63,8 +58,6 @@ class Spellchecker : public ObjectWrap {
   }
 
   static NAN_METHOD(GetAvailableDictionaries) {
-    NanScope();
-
     Spellchecker* that = ObjectWrap::Unwrap<Spellchecker>(args.Holder());
 
     std::string path = ".";
@@ -85,7 +78,6 @@ class Spellchecker : public ObjectWrap {
   }
 
   static NAN_METHOD(GetCorrectionsForMisspelling) {
-    NanScope();
     if (args.Length() < 1) {
       return NanThrowError("Bad argument");
     }
