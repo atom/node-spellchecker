@@ -68,10 +68,10 @@ class Spellchecker : public ObjectWrap {
     std::vector<std::string> dictionaries =
       that->impl->GetAvailableDictionaries(path);
 
-    Local<Array> result = NanNew<Array>(dictionaries.size());
+    Handle<Array> result = NanNew<Array>(dictionaries.size());
     for (size_t i = 0; i < dictionaries.size(); ++i) {
       const std::string& dict = dictionaries[i];
-      result->Set(i, NanNew(dict.data(), dict.size()));
+      result->Set(i, NanNew<String>(dict.data(), dict.size()));
     }
 
     NanReturnValue(result);
