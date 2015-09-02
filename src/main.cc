@@ -78,7 +78,7 @@ class Spellchecker : public Nan::ObjectWrap {
     Local<Array> result = Nan::New<Array>(dictionaries.size());
     for (size_t i = 0; i < dictionaries.size(); ++i) {
       const std::string& dict = dictionaries[i];
-      result->Set(i, Nan::New(dict.data(), dict.size()));
+      result->Set(i, Nan::New(dict.data(), dict.size()).ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);
@@ -99,7 +99,9 @@ class Spellchecker : public Nan::ObjectWrap {
     Local<Array> result = Nan::New<Array>(corrections.size());
     for (size_t i = 0; i < corrections.size(); ++i) {
       const std::string& word = corrections[i];
-      result->Set(i, Nan::New<String>(word.data(), word.size())).ToLocalChecked();
+
+      Nan::MaybeLocal<String> val = Nan::New<String>(word.data(), word.size());
+      result->Set(i, val.ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);
