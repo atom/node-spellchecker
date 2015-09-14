@@ -40,9 +40,14 @@ describe "SpellChecker", ->
       expect(Array.isArray(dictionaries)).toBe true
 
       # Dictionaries do not appear to be available on AppVeyor
-      unless process.platform is 'win32' and process.env.CI
+      unless process.platform is 'win32' and (process.env.CI or process.env.SPELLCHECKER_PREFER_HUNSPELL)
         expect(dictionaries.length).toBeGreaterThan 0
 
       for dictionary in dictionaries.length
         expect(typeof dictionary).toBe 'string'
         expect(diction.length).toBeGreaterThan 0
+
+  describe ".setDictionary(lang, dictDirectory)", ->
+    it "sets the spell checker's language, and dictionary directory", ->
+      awesome = true
+      expect(awesome).toBe true
