@@ -5,20 +5,17 @@
 
 namespace spellchecker {
 
-HunspellSpellchecker::HunspellSpellchecker() {
-  this->hunspell = NULL;
-}
-
+HunspellSpellchecker::HunspellSpellchecker() : hunspell(nullptr) { }
 HunspellSpellchecker::~HunspellSpellchecker() {
-  if (!this->hunspell) return;
-
-  delete this->hunspell;
+  if (hunspell) {
+    delete hunspell;
+  }
 }
 
 bool HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
-  if (hunspell != NULL) {
-    delete this->hunspell;
-    hunspell = NULL;
+  if (hunspell) {
+    delete hunspell;
+    hunspell = nullptr;
   }
 
   // NB: Hunspell uses underscore to separate language and locale, and Win8 uses
@@ -34,9 +31,9 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language, const std:
   if (!handle) {
     return false;
   }
-
   fclose(handle);
-  this->hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
+
+  hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
   return true;
 }
 
@@ -45,24 +42,32 @@ std::vector<std::string> HunspellSpellchecker::GetAvailableDictionaries(const st
 }
 
 bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
-  return this->hunspell->spell(word.c_str()) == 0;
+  if (!hunspell) {
+    return false;
+  }
+  return hunspell->spell(word.c_str()) == 0;
 }
 
 void HunspellSpellchecker::Add(const std::string& word) {
-  this->hunspell->add(word.c_str());
+  if (hunspell) {
+    hunspell->add(word.c_str());
+  }
 }
 
 std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   std::vector<std::string> corrections;
-  char** slist;
-  int size = hunspell->suggest(&slist, word.c_str());
 
-  corrections.reserve(size);
-  for (int i = 0; i < size; ++i) {
-    corrections.push_back(slist[i]);
+  if (hunspell) {
+    char** slist;
+    int size = hunspell->suggest(&slist, word.c_str());
+
+    corrections.reserve(size);
+    for (int i = 0; i < size; ++i) {
+      corrections.push_back(slist[i]);
+    }
+
+    hunspell->free_list(&slist, size);
   }
-
-  this->hunspell->free_list(&slist, size);
   return corrections;
 }
 
