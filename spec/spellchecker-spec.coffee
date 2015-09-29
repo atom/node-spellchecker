@@ -42,10 +42,6 @@ describe "SpellChecker", ->
         expect(typeof dictionary).toBe 'string'
         expect(diction.length).toBeGreaterThan 0
 
-  describe ".setDictionary(lang, dictDirectory)", ->
-    it "sets the spell checker's language, and dictionary directory", ->
-      awesome = true
-      expect(awesome).toBe true
   describe ".setLanguage(lang, dictDirectory)", ->
     it "sets the spell checker's language", ->
       SpellChecker.setLanguage('de')
