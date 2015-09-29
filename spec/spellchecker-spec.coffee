@@ -1,13 +1,26 @@
 SpellChecker = require '../lib/spellchecker'
 
 describe "SpellChecker", ->
+
+  describe "getDefaultLanguage()", ->
+    it "uses the system default dictionary", ->
+      systemDefaultLanguage = SpellChecker.getDefaultLanguage()
+      systemDefaultLanguage = systemDefaultLanguage.toLowerCase().replace('-', '_')
+      switch systemDefaultLanguage
+        when "en_gb", "en_uk"
+          expect(SpellChecker.isMisspelled('colour')).toBe false;
+          expect(SpellChecker.isMisspelled('color')).toBe true;
+        when "en", "en_us"
+          expect(SpellChecker.isMisspelled('colour')).toBe true;
+          expect(SpellChecker.isMisspelled('color')).toBe false;
+
   describe ".isMisspelled(word)", ->
     it "returns true if the word is mispelled", ->
-      SpellChecker.setLanguage('en_us') # Override the system default.
+      SpellChecker.setLanguage('en') # Override the system default.
       expect(SpellChecker.isMisspelled('wwoorrdd')).toBe true
 
     it "returns false if the word isn't mispelled", ->
-      SpellChecker.setLanguage('en_us')
+      SpellChecker.setLanguage('en')
       expect(SpellChecker.isMisspelled('word')).toBe false
 
     it "throws an exception when no word specified", ->
@@ -15,7 +28,7 @@ describe "SpellChecker", ->
 
   describe ".getCorrectionsForMisspelling(word)", ->
     it "returns an array of possible corrections", ->
-      SpellChecker.setLanguage('en_us')
+      SpellChecker.setLanguage('en')
       corrections = SpellChecker.getCorrectionsForMisspelling('worrd')
       expect(corrections.length).toBeGreaterThan 0
       expect(corrections.indexOf('word')).toBeGreaterThan -1
