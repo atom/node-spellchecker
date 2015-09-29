@@ -36,7 +36,6 @@ describe "SpellChecker", ->
     it "throws an exception when no word specified", ->
       expect(-> SpellChecker.getCorrectionsForMisspelling()).toThrow()
 
-
     it "throws an error if no word is specified", ->
       errorOccurred = false
       try
