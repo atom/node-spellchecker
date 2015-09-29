@@ -51,3 +51,16 @@ describe "SpellChecker", ->
     it "sets the spell checker's language, and dictionary directory", ->
       awesome = true
       expect(awesome).toBe true
+  describe ".setLanguage(lang, dictDirectory)", ->
+    it "sets the spell checker's language", ->
+      SpellChecker.setLanguage('de')
+      expect(SpellChecker.isMisspelled('Wortwitz')).toBe false
+      expect(SpellChecker.isMisspelled('Wortwitzz')).toBe true
+      expect(SpellChecker.isMisspelled('Schnabeltier')).toBe false
+      expect(SpellChecker.isMisspelled('Platypus')).toBe true
+      SpellChecker.setLanguage('en_uk')
+      expect(SpellChecker.isMisspelled('colour')).toBe false
+      expect(SpellChecker.isMisspelled('color')).toBe true
+      SpellChecker.setLanguage('en_us')
+      expect(SpellChecker.isMisspelled('color')).toBe false
+      expect(SpellChecker.isMisspelled('colour')).toBe true
