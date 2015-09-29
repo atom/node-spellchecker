@@ -20,11 +20,6 @@ describe "SpellChecker", ->
     it "throws an exception when no word specified", ->
       expect(-> SpellChecker.getCorrectionsForMisspelling()).toThrow()
 
-  describe ".add(word)", ->
-    it "allows words to be added to the dictionary", ->
-      expect(SpellChecker.isMisspelled('wwoorrdd')).toBe true
-      SpellChecker.add('wwoorrdd')
-      expect(SpellChecker.isMisspelled('wwoorrdd')).toBe false
 
     it "throws an error if no word is specified", ->
       errorOccurred = false
