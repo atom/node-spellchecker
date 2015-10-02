@@ -5,7 +5,7 @@
 
 namespace spellchecker {
 
-HunspellSpellchecker::HunspellSpellchecker() : hunspell(nullptr) { }
+HunspellSpellchecker::HunspellSpellchecker() : hunspell(NULL) { }
 HunspellSpellchecker::~HunspellSpellchecker() {
   if (hunspell) {
     delete hunspell;
@@ -15,7 +15,7 @@ HunspellSpellchecker::~HunspellSpellchecker() {
 bool HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
   if (hunspell) {
     delete hunspell;
-    hunspell = nullptr;
+    hunspell = NULL;
   }
 
   // NB: Hunspell uses underscore to separate language and locale, and Win8 uses
