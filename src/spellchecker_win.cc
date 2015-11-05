@@ -55,6 +55,7 @@ std::wstring ToWString(const std::string& string) {
 }
 
 WindowsSpellchecker::WindowsSpellchecker() {
+  this->spellcheckerFactory = NULL;
   this->currentSpellchecker = NULL;
 
   if (InterlockedIncrement(&g_COMRefcount) == 1) {
@@ -73,8 +74,14 @@ WindowsSpellchecker::WindowsSpellchecker() {
 }
 
 WindowsSpellchecker::~WindowsSpellchecker() {
+  if (this->currentSpellchecker) {
+    this->currentSpellchecker->Release();
+    this->currentSpellchecker = NULL;
+  }
+  
   if (this->spellcheckerFactory) {
     this->spellcheckerFactory->Release();
+    this->spellcheckerFactory = NULL;
   }
 
   if (InterlockedDecrement(&g_COMRefcount) == 0) {
@@ -83,7 +90,7 @@ WindowsSpellchecker::~WindowsSpellchecker() {
 }
 
 bool WindowsSpellchecker::IsSupported() {
-  return !(g_COMFailed || (spellcheckerFactory == NULL));
+  return !(g_COMFailed || (this->spellcheckerFactory == NULL));
 }
 
 bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
