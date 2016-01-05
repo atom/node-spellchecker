@@ -11,6 +11,15 @@ describe "SpellChecker", ->
     it "throws an exception when no word specified", ->
       expect(-> SpellChecker.isMisspelled()).toThrow()
 
+  describe ".checkSpelling(string)", ->
+    it "returns an array of character ranges of misspelled words", ->
+      string = "cat caat dog dooog"
+
+      expect(SpellChecker.checkSpelling(string)).toEqual [
+        {start: 4, end: 8},
+        {start: 13, end: 18},
+      ]
+
   describe ".getCorrectionsForMisspelling(word)", ->
     it "returns an array of possible corrections", ->
       corrections = SpellChecker.getCorrectionsForMisspelling('worrd')

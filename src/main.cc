@@ -1,3 +1,4 @@
+#include <vector>
 #include "nan.h"
 #include "spellchecker.h"
 
@@ -47,6 +48,29 @@ class Spellchecker : public Nan::ObjectWrap {
     std::string word = *String::Utf8Value(info[0]);
 
     info.GetReturnValue().Set(Nan::New(that->impl->IsMisspelled(word)));
+  }
+
+  static NAN_METHOD(CheckSpelling) {
+    Nan::HandleScope scope;
+    if (info.Length() < 1) {
+      return Nan::ThrowError("Bad argument");
+    }
+
+    Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
+    String::Utf8Value text(info[0]);
+
+    std::vector<MisspelledRange> misspelled_ranges = that->impl->CheckSpelling(*text, text.length());
+
+    Local<Array> result = Nan::New<Array>();
+    std::vector<MisspelledRange>::const_iterator iter = misspelled_ranges.begin();
+    for (; iter != misspelled_ranges.end(); ++iter) {
+      Local<Object> misspelled_range = Nan::New<Object>();
+      misspelled_range->Set(Nan::New("start").ToLocalChecked(), Nan::New<Number>(iter->start));
+      misspelled_range->Set(Nan::New("end").ToLocalChecked(), Nan::New<Number>(iter->end));
+      result->Set(iter - misspelled_ranges.begin(), misspelled_range);
+    }
+
+    info.GetReturnValue().Set(result);
   }
 
   static NAN_METHOD(Add) {
@@ -127,6 +151,7 @@ class Spellchecker : public Nan::ObjectWrap {
     Nan::SetMethod(tpl->InstanceTemplate(), "getAvailableDictionaries", Spellchecker::GetAvailableDictionaries);
     Nan::SetMethod(tpl->InstanceTemplate(), "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);
     Nan::SetMethod(tpl->InstanceTemplate(), "isMisspelled", Spellchecker::IsMisspelled);
+    Nan::SetMethod(tpl->InstanceTemplate(), "checkSpelling", Spellchecker::CheckSpelling);
     Nan::SetMethod(tpl->InstanceTemplate(), "add", Spellchecker::Add);
 
     exports->Set(Nan::New("Spellchecker").ToLocalChecked(), tpl->GetFunction());

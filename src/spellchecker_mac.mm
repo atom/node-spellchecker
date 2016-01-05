@@ -52,6 +52,23 @@ bool MacSpellchecker::IsMisspelled(const std::string& word) {
   return result;
 }
 
+std::vector<MisspelledRange> MacSpellchecker::CheckSpelling(const char *text, size_t length) {
+  std::vector<MisspelledRange> result;
+
+  @autoreleasepool {
+    NSString* string = [NSString stringWithUTF8String:text];
+    NSArray *misspellings = [this->spellChecker checkString:string range:NSMakeRange(0, length) types:NSTextCheckingTypeSpelling options:nil inSpellDocumentWithTag:0 orthography:nil wordCount:nil];
+    for (NSTextCheckingResult *misspelling in misspellings) {
+      MisspelledRange range;
+      range.start = misspelling.range.location;
+      range.end = misspelling.range.location + misspelling.range.length;
+      result.push_back(range);
+    }
+  }
+
+  return result;
+}
+
 void MacSpellchecker::Add(const std::string& word) {
   @autoreleasepool {
     NSString* newWord = [NSString stringWithUTF8String:word.c_str()];

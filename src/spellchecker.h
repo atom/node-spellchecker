@@ -6,6 +6,11 @@
 
 namespace spellchecker {
 
+struct MisspelledRange {
+  size_t start;
+  size_t end;
+};
+
 class SpellcheckerImplementation {
 public:
   virtual bool SetDictionary(const std::string& language, const std::string& path) = 0;
@@ -16,6 +21,8 @@ public:
 
   // Returns true if the word is misspelled.
   virtual bool IsMisspelled(const std::string& word) = 0;
+
+  virtual std::vector<MisspelledRange> CheckSpelling(const char *text, size_t length) = 0;
 
   // Adds a new word to the dictionary.
   // NB: When using Hunspell, this will not modify the .dic file; custom words must be added each
