@@ -78,7 +78,7 @@ WindowsSpellchecker::~WindowsSpellchecker() {
     this->currentSpellchecker->Release();
     this->currentSpellchecker = NULL;
   }
-  
+
   if (this->spellcheckerFactory) {
     this->spellcheckerFactory->Release();
     this->spellcheckerFactory = NULL;
@@ -185,6 +185,36 @@ bool WindowsSpellchecker::IsMisspelled(const std::string& word) {
 
   errors->Release();
   return ret;
+}
+
+std::vector<MisspelledRange> WindowsSpellchecker::CheckSpelling(const char *text, size_t length) {
+  std::vector<MisspelledRange> result;
+
+  if (this->currentSpellchecker == NULL) {
+    return result;
+  }
+
+  IEnumSpellingError* errors = NULL;
+  std::wstring wtext = ToWString(text);
+  if (FAILED(this->currentSpellchecker->Check(wtext.c_str(), &errors))) {
+    return result;
+  }
+
+  ISpellingError *error;
+  while (errors->Next(&error) == S_OK) {
+    ULONG start, length;
+    error->get_StartIndex(&start);
+    error->get_Length(&length);
+
+    MisspelledRange range;
+    range.start = start;
+    range.end = start + length;
+    result.push_back(range);
+    error->Release();
+  }
+
+  errors->Release();
+  return result;
 }
 
 void WindowsSpellchecker::Add(const std::string& word) {

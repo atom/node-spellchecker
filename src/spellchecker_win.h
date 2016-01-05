@@ -18,6 +18,7 @@ public:
 
   std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
   bool IsMisspelled(const std::string& word);
+  std::vector<MisspelledRange> CheckSpelling(const char *text, size_t length);
   void Add(const std::string& word);
 
 private:
