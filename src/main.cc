@@ -56,14 +56,24 @@ class Spellchecker : public Nan::ObjectWrap {
       return Nan::ThrowError("Bad argument");
     }
 
-    Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
     Handle<String> string = Handle<String>::Cast(info[0]);
+    if (!string->IsString()) {
+      return Nan::ThrowError("Bad argument");
+    }
+
+    Local<Array> result = Nan::New<Array>();
+    info.GetReturnValue().Set(result);
+
+    if (string->Length() == 0) {
+      return;
+    }
+
     std::vector<uint16_t> text(string->Length());
     string->Write(reinterpret_cast<uint16_t *>(text.data()));
 
+    Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
     std::vector<MisspelledRange> misspelled_ranges = that->impl->CheckSpelling(text.data(), text.size());
 
-    Local<Array> result = Nan::New<Array>();
     std::vector<MisspelledRange>::const_iterator iter = misspelled_ranges.begin();
     for (; iter != misspelled_ranges.end(); ++iter) {
       size_t index = iter - misspelled_ranges.begin();
@@ -74,8 +84,6 @@ class Spellchecker : public Nan::ObjectWrap {
       misspelled_range->Set(Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
       result->Set(index, misspelled_range);
     }
-
-    info.GetReturnValue().Set(result);
   }
 
   static NAN_METHOD(Add) {

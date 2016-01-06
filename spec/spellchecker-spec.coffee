@@ -35,6 +35,12 @@ describe "SpellChecker", ->
         {start: 20, end: 25},
       ]
 
+    it "handles invalid inputs", ->
+      expect(SpellChecker.checkSpelling("")).toEqual []
+      expect(-> SpellChecker.checkSpelling()).toThrow("Bad argument")
+      expect(-> SpellChecker.checkSpelling(null)).toThrow("Bad argument")
+      expect(-> SpellChecker.checkSpelling({})).toThrow("Bad argument")
+
   describe ".getCorrectionsForMisspelling(word)", ->
     it "returns an array of possible corrections", ->
       corrections = SpellChecker.getCorrectionsForMisspelling('worrd')
