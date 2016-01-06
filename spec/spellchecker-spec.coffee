@@ -35,6 +35,8 @@ describe "SpellChecker", ->
       expect(errorOccurred).toBe true
 
   describe ".getAvailableDictionaries()", ->
+    return if process.platform is 'linux'
+
     it "returns an array of string dictionary names", ->
       dictionaries = SpellChecker.getAvailableDictionaries()
       expect(Array.isArray(dictionaries)).toBe true
