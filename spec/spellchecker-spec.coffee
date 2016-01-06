@@ -20,12 +20,19 @@ describe "SpellChecker", ->
         {start: 13, end: 18},
       ]
 
-    it "accounts for UTF16 pairs correctly", ->
+    it "accounts for UTF16 pairs", ->
       string = "😎 cat caat dog dooog"
 
       expect(SpellChecker.checkSpelling(string)).toEqual [
         {start: 7, end: 11},
         {start: 16, end: 21},
+      ]
+
+    it "accounts for other non-word characters", ->
+      string = "'cat' (caat. <dog> :dooog)"
+      expect(SpellChecker.checkSpelling(string)).toEqual [
+        {start: 7, end: 11},
+        {start: 20, end: 25},
       ]
 
   describe ".getCorrectionsForMisspelling(word)", ->
