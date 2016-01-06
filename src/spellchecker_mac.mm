@@ -52,13 +52,14 @@ bool MacSpellchecker::IsMisspelled(const std::string& word) {
   return result;
 }
 
-std::vector<MisspelledRange> MacSpellchecker::CheckSpelling(const char *text, size_t length) {
+std::vector<MisspelledRange> MacSpellchecker::CheckSpelling(const uint16_t *text, size_t length) {
   std::vector<MisspelledRange> result;
 
   @autoreleasepool {
-    NSString* string = [NSString stringWithUTF8String:text];
+    NSData *data = [[NSData alloc] initWithBytesNoCopy:(void *)(text) length:(length * 2) freeWhenDone:NO];
+    NSString* string = [[NSString alloc] initWithData:data encoding:NSUTF16LittleEndianStringEncoding];
     NSArray *misspellings = [this->spellChecker checkString:string
-                                                      range:NSMakeRange(0, length)
+                                                      range:NSMakeRange(0, string.length)
                                                       types:NSTextCheckingTypeSpelling
                                                     options:nil
                                      inSpellDocumentWithTag:0

@@ -187,7 +187,7 @@ bool WindowsSpellchecker::IsMisspelled(const std::string& word) {
   return ret;
 }
 
-std::vector<MisspelledRange> WindowsSpellchecker::CheckSpelling(const char *text, size_t length) {
+std::vector<MisspelledRange> WindowsSpellchecker::CheckSpelling(const uint16_t *text, size_t length) {
   std::vector<MisspelledRange> result;
 
   if (this->currentSpellchecker == NULL) {
@@ -195,7 +195,7 @@ std::vector<MisspelledRange> WindowsSpellchecker::CheckSpelling(const char *text
   }
 
   IEnumSpellingError* errors = NULL;
-  std::wstring wtext = ToWString(text);
+  std::wstring wtext(reinterpret_cast<const wchar_t *>(text), length);
   if (FAILED(this->currentSpellchecker->Check(wtext.c_str(), &errors))) {
     return result;
   }

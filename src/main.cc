@@ -57,9 +57,11 @@ class Spellchecker : public Nan::ObjectWrap {
     }
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
-    String::Utf8Value text(info[0]);
+    Handle<String> string = Handle<String>::Cast(info[0]);
+    std::vector<uint16_t> text(string->Length());
+    string->Write(reinterpret_cast<uint16_t *>(text.data()));
 
-    std::vector<MisspelledRange> misspelled_ranges = that->impl->CheckSpelling(*text, text.length());
+    std::vector<MisspelledRange> misspelled_ranges = that->impl->CheckSpelling(text.data(), text.size());
 
     Local<Array> result = Nan::New<Array>();
     std::vector<MisspelledRange>::const_iterator iter = misspelled_ranges.begin();

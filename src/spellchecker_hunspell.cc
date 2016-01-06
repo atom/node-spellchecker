@@ -1,6 +1,8 @@
 #include <cstdio>
+#include <cwctype>
 #include <algorithm>
 #include "../vendor/hunspell/src/hunspell/hunspell.hxx"
+#include "../vendor/hunspell/src/hunspell/csutil.hxx"
 #include "spellchecker_hunspell.h"
 
 namespace spellchecker {
@@ -48,7 +50,7 @@ bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
   return hunspell->spell(word.c_str()) == 0;
 }
 
-std::vector<MisspelledRange> HunspellSpellchecker::CheckSpelling(const char *text, size_t length) {
+std::vector<MisspelledRange> HunspellSpellchecker::CheckSpelling(const uint16_t *utf16_text, size_t utf16_length) {
   std::vector<MisspelledRange> result;
   return result;
 }
