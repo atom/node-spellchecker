@@ -52,6 +52,38 @@ bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
 
 std::vector<MisspelledRange> HunspellSpellchecker::CheckSpelling(const uint16_t *utf16_text, size_t utf16_length) {
   std::vector<MisspelledRange> result;
+
+  if (!hunspell) {
+    return result;
+  }
+
+  std::vector<char> utf8_buffer(256);
+  char *utf8_word = utf8_buffer.data();
+
+  bool within_word = false;
+  size_t word_start = 0;
+  for (size_t i = 0; i <= utf16_length; i++) {
+    bool is_alpha = i < utf16_length && std::iswalpha(utf16_text[i]);
+
+    if (within_word) {
+      if (!is_alpha) {
+        within_word = false;
+        const w_char *utf16_word = reinterpret_cast<const w_char *>(utf16_text + word_start);
+        u16_u8(utf8_word, utf8_buffer.size(), utf16_word, i - word_start);
+
+        if (hunspell->spell(utf8_word) == 0) {
+          MisspelledRange range;
+          range.start = word_start;
+          range.end = i;
+          result.push_back(range);
+        }
+      }
+    } else if (is_alpha) {
+      word_start = i;
+      within_word = true;
+    }
+  }
+
   return result;
 }
 
