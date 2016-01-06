@@ -66,10 +66,13 @@ class Spellchecker : public Nan::ObjectWrap {
     Local<Array> result = Nan::New<Array>();
     std::vector<MisspelledRange>::const_iterator iter = misspelled_ranges.begin();
     for (; iter != misspelled_ranges.end(); ++iter) {
+      size_t index = iter - misspelled_ranges.begin();
+      uint32_t start = iter->start, end = iter->end;
+
       Local<Object> misspelled_range = Nan::New<Object>();
-      misspelled_range->Set(Nan::New("start").ToLocalChecked(), Nan::New<Number>(iter->start));
-      misspelled_range->Set(Nan::New("end").ToLocalChecked(), Nan::New<Number>(iter->end));
-      result->Set(iter - misspelled_ranges.begin(), misspelled_range);
+      misspelled_range->Set(Nan::New("start").ToLocalChecked(), Nan::New<Integer>(start));
+      misspelled_range->Set(Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
+      result->Set(index, misspelled_range);
     }
 
     info.GetReturnValue().Set(result);
