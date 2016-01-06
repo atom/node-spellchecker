@@ -49,7 +49,7 @@
              'src/spellchecker_linux.cc'
           ],
         }],
-        ['OS=="mac" and spellchecker_use_hunspell=="false"', {
+        ['OS=="mac"', {
           'sources': [
             'src/spellchecker_mac.mm',
           ],
