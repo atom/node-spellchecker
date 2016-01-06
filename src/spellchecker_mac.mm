@@ -1,4 +1,5 @@
 #include "spellchecker_mac.h"
+#include "spellchecker_hunspell.h"
 
 #import <Cocoa/Cocoa.h>
 #import <dispatch/dispatch.h>
@@ -85,6 +86,12 @@ std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std
 }
 
 SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker() {
+#ifdef USE_HUNSPELL
+  if (getenv("SPELLCHECKER_PREFER_HUNSPELL")) {
+    return new HunspellSpellchecker();
+  }
+#endif
+
   return new MacSpellchecker();
 }
 
