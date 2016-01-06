@@ -57,7 +57,13 @@ std::vector<MisspelledRange> MacSpellchecker::CheckSpelling(const char *text, si
 
   @autoreleasepool {
     NSString* string = [NSString stringWithUTF8String:text];
-    NSArray *misspellings = [this->spellChecker checkString:string range:NSMakeRange(0, length) types:NSTextCheckingTypeSpelling options:nil inSpellDocumentWithTag:0 orthography:nil wordCount:nil];
+    NSArray *misspellings = [this->spellChecker checkString:string
+                                                      range:NSMakeRange(0, length)
+                                                      types:NSTextCheckingTypeSpelling
+                                                    options:nil
+                                     inSpellDocumentWithTag:0
+                                                orthography:nil
+                                                  wordCount:nil];
     for (NSTextCheckingResult *misspelling in misspellings) {
       MisspelledRange range;
       range.start = misspelling.range.location;
