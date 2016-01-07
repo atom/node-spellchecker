@@ -63,28 +63,49 @@ std::vector<MisspelledRange> HunspellSpellchecker::CheckSpelling(const uint16_t 
 
   std::vector<char> utf8_buffer(256);
 
-  size_t word_start = 0;
-  bool within_word = false;
-  for (size_t i = 0; i < utf16_length; i++) {
-    uint16_t c = utf16_text[i];
-    bool is_word_character = iswalpha(c);
-    if (within_word) {
-      if (!is_word_character) {
-        within_word = false;
+  enum {
+    unknown,
+    in_separator,
+    in_word,
+  } state = in_separator;
 
-        bool converted = TranscodeUTF16ToUTF8(transcoder, (char *)utf8_buffer.data(), utf8_buffer.size(), utf16_text + word_start, i - word_start);
-        if (converted) {
-          if (hunspell->spell(utf8_buffer.data()) == 0) {
-            MisspelledRange range;
-            range.start = word_start;
-            range.end = i;
-            result.push_back(range);
-          }
+  for (size_t word_start = 0, i = 0; i < utf16_length; i++) {
+    uint16_t c = utf16_text[i];
+
+    switch (state) {
+      case unknown:
+        if (iswpunct(c) || iswspace(c)) {
+          state = in_separator;
         }
-      }
-    } else if (is_word_character) {
-      word_start = i;
-      within_word = true;
+        break;
+
+      case in_separator:
+        if (iswalpha(c)) {
+          word_start = i;
+          state = in_word;
+        } else if (!iswpunct(c) && !iswspace(c)) {
+          state = unknown;
+        }
+        break;
+
+      case in_word:
+        if (c == '\'' && iswalpha(utf16_text[i + 1])) {
+          i++;
+        } else if (c == 0 || iswpunct(c) || iswspace(c)) {
+          state = in_separator;
+          bool converted = TranscodeUTF16ToUTF8(transcoder, (char *)utf8_buffer.data(), utf8_buffer.size(), utf16_text + word_start, i - word_start);
+          if (converted) {
+            if (hunspell->spell(utf8_buffer.data()) == 0) {
+              MisspelledRange range;
+              range.start = word_start;
+              range.end = i;
+              result.push_back(range);
+            }
+          }
+        } else if (!iswalpha(c)) {
+          state = unknown;
+        }
+        break;
     }
   }
 

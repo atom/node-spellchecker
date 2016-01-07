@@ -35,6 +35,24 @@ describe "SpellChecker", ->
         {start: 20, end: 25},
       ]
 
+    it "does not treat non-english letters as word boundaries", ->
+      SpellChecker.add("cliché")
+      expect(SpellChecker.checkSpelling("what cliché nonsense")).toEqual []
+
+    it "handles words with apostrophes", ->
+      string = "doesn't isn't aint hasn't"
+      expect(SpellChecker.checkSpelling(string)).toEqual [
+        {start: string.indexOf("aint"), end: string.indexOf("aint") + 4}
+      ]
+
+      string = "you say you're 'certain', but are you really?"
+      expect(SpellChecker.checkSpelling(string)).toEqual []
+
+      string = "you say you're 'sertan', but are you really?"
+      expect(SpellChecker.checkSpelling(string)).toEqual [
+        {start: string.indexOf("sertan"), end: string.indexOf("',")}
+      ]
+
     it "handles invalid inputs", ->
       expect(SpellChecker.checkSpelling("")).toEqual []
       expect(-> SpellChecker.checkSpelling()).toThrow("Bad argument")
