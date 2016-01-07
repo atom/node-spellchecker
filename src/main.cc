@@ -68,7 +68,7 @@ class Spellchecker : public Nan::ObjectWrap {
       return;
     }
 
-    std::vector<uint16_t> text(string->Length());
+    std::vector<uint16_t> text(string->Length() + 1);
     string->Write(reinterpret_cast<uint16_t *>(text.data()));
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
