@@ -2,15 +2,19 @@
 #include <cwctype>
 #include <algorithm>
 #include "../vendor/hunspell/src/hunspell/hunspell.hxx"
-#include "../vendor/hunspell/src/hunspell/csutil.hxx"
 #include "spellchecker_hunspell.h"
 
 namespace spellchecker {
 
-HunspellSpellchecker::HunspellSpellchecker() : hunspell(NULL) { }
+HunspellSpellchecker::HunspellSpellchecker() : hunspell(NULL), transcoder(NewTranscoder()) { }
+
 HunspellSpellchecker::~HunspellSpellchecker() {
   if (hunspell) {
     delete hunspell;
+  }
+
+  if (transcoder) {
+    FreeTranscoder(transcoder);
   }
 }
 
@@ -53,27 +57,29 @@ bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
 std::vector<MisspelledRange> HunspellSpellchecker::CheckSpelling(const uint16_t *utf16_text, size_t utf16_length) {
   std::vector<MisspelledRange> result;
 
-  if (!hunspell) {
+  if (!hunspell || !transcoder) {
     return result;
   }
 
   std::vector<char> utf8_buffer(256);
-  char *utf8_word = utf8_buffer.data();
 
   size_t word_start = 0;
   bool within_word = false;
   for (size_t i = 0; i < utf16_length; i++) {
-    bool is_word_character = iswalpha(utf16_text[i]);
+    uint16_t c = utf16_text[i];
+    bool is_word_character = iswalpha(c);
     if (within_word) {
       if (!is_word_character) {
         within_word = false;
-        const w_char *utf16_word = reinterpret_cast<const w_char *>(utf16_text + word_start);
-        u16_u8(utf8_word, utf8_buffer.size(), utf16_word, i - word_start);
-        if (hunspell->spell(utf8_word) == 0) {
-          MisspelledRange range;
-          range.start = word_start;
-          range.end = i;
-          result.push_back(range);
+
+        bool converted = TranscodeUTF16ToUTF8(transcoder, (char *)utf8_buffer.data(), utf8_buffer.size(), utf16_text + word_start, i - word_start);
+        if (converted) {
+          if (hunspell->spell(utf8_buffer.data()) == 0) {
+            MisspelledRange range;
+            range.start = word_start;
+            range.end = i;
+            result.push_back(range);
+          }
         }
       }
     } else if (is_word_character) {

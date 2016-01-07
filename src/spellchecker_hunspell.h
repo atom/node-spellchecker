@@ -2,6 +2,7 @@
 #define SRC_SPELLCHECKER_HUNSPELL_H_
 
 #include "spellchecker.h"
+#include "transcoder.h"
 
 class Hunspell;
 
@@ -21,6 +22,7 @@ public:
 
 private:
   Hunspell* hunspell;
+  Transcoder *transcoder;
 };
 
 }  // namespace spellchecker
