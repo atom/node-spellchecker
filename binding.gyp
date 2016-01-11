@@ -41,17 +41,20 @@
         }],
         ['OS=="win"', {
           'sources': [
-             'src/spellchecker_win.cc'
+             'src/spellchecker_win.cc',
+             'src/transcoder_win.cc',
           ],
         }],
         ['OS=="linux"', {
           'sources': [
-             'src/spellchecker_linux.cc'
+             'src/spellchecker_linux.cc',
+             'src/transcoder_posix.cc',
           ],
         }],
         ['OS=="mac"', {
           'sources': [
             'src/spellchecker_mac.mm',
+            'src/transcoder_posix.cc',
           ],
           'link_settings': {
             'libraries': [

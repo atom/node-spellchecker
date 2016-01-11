@@ -1,3 +1,4 @@
+#include <vector>
 #include "nan.h"
 #include "spellchecker.h"
 
@@ -47,6 +48,42 @@ class Spellchecker : public Nan::ObjectWrap {
     std::string word = *String::Utf8Value(info[0]);
 
     info.GetReturnValue().Set(Nan::New(that->impl->IsMisspelled(word)));
+  }
+
+  static NAN_METHOD(CheckSpelling) {
+    Nan::HandleScope scope;
+    if (info.Length() < 1) {
+      return Nan::ThrowError("Bad argument");
+    }
+
+    Handle<String> string = Handle<String>::Cast(info[0]);
+    if (!string->IsString()) {
+      return Nan::ThrowError("Bad argument");
+    }
+
+    Local<Array> result = Nan::New<Array>();
+    info.GetReturnValue().Set(result);
+
+    if (string->Length() == 0) {
+      return;
+    }
+
+    std::vector<uint16_t> text(string->Length() + 1);
+    string->Write(reinterpret_cast<uint16_t *>(text.data()));
+
+    Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
+    std::vector<MisspelledRange> misspelled_ranges = that->impl->CheckSpelling(text.data(), text.size());
+
+    std::vector<MisspelledRange>::const_iterator iter = misspelled_ranges.begin();
+    for (; iter != misspelled_ranges.end(); ++iter) {
+      size_t index = iter - misspelled_ranges.begin();
+      uint32_t start = iter->start, end = iter->end;
+
+      Local<Object> misspelled_range = Nan::New<Object>();
+      misspelled_range->Set(Nan::New("start").ToLocalChecked(), Nan::New<Integer>(start));
+      misspelled_range->Set(Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
+      result->Set(index, misspelled_range);
+    }
   }
 
   static NAN_METHOD(Add) {
@@ -127,6 +164,7 @@ class Spellchecker : public Nan::ObjectWrap {
     Nan::SetMethod(tpl->InstanceTemplate(), "getAvailableDictionaries", Spellchecker::GetAvailableDictionaries);
     Nan::SetMethod(tpl->InstanceTemplate(), "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);
     Nan::SetMethod(tpl->InstanceTemplate(), "isMisspelled", Spellchecker::IsMisspelled);
+    Nan::SetMethod(tpl->InstanceTemplate(), "checkSpelling", Spellchecker::CheckSpelling);
     Nan::SetMethod(tpl->InstanceTemplate(), "add", Spellchecker::Add);
 
     exports->Set(Nan::New("Spellchecker").ToLocalChecked(), tpl->GetFunction());
