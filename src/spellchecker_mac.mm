@@ -8,14 +8,12 @@ namespace spellchecker {
 
 
 MacSpellchecker::MacSpellchecker() {
-  this->spellChecker = [[NSSpellChecker alloc] init];
+  this->spellChecker = [NSSpellChecker sharedSpellChecker];
   [this->spellChecker setAutomaticallyIdentifiesLanguages: NO];
 }
 
 MacSpellchecker::~MacSpellchecker() {
-  [this->spellChecker release];
 }
-
 
 bool MacSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
   @autoreleasepool {
