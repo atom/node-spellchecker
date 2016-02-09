@@ -8,17 +8,21 @@ namespace spellchecker {
 
 
 MacSpellchecker::MacSpellchecker() {
+  this->spellCheckerLanguage = nil;
   this->spellChecker = [NSSpellChecker sharedSpellChecker];
   [this->spellChecker setAutomaticallyIdentifiesLanguages: NO];
 }
 
 MacSpellchecker::~MacSpellchecker() {
+  [this->spellCheckerLanguage release];
+  this->spellCheckerLanguage = nil;
 }
 
 bool MacSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
   @autoreleasepool {
-    NSString* lang = [NSString stringWithUTF8String: language.c_str()];
-    return [this->spellChecker setLanguage: lang] == YES;
+    [this->spellCheckerLanguage release];
+    this->spellCheckerLanguage = [[NSString alloc] initWithUTF8String: language.c_str()];
+    return [this->spellChecker setLanguage: this->spellCheckerLanguage] == YES;
   }
 }
 
@@ -40,6 +44,9 @@ bool MacSpellchecker::IsMisspelled(const std::string& word) {
   bool result;
 
   @autoreleasepool {
+    if (this->spellCheckerLanguage) {
+      [this->spellChecker setLanguage: this->spellCheckerLanguage];
+    }
     NSString* misspelling = [NSString stringWithUTF8String:word.c_str()];
     NSRange range = [this->spellChecker checkSpellingOfString:misspelling
                                                    startingAt:0];
@@ -54,6 +61,9 @@ std::vector<MisspelledRange> MacSpellchecker::CheckSpelling(const uint16_t *text
   std::vector<MisspelledRange> result;
 
   @autoreleasepool {
+    if (this->spellCheckerLanguage) {
+      [this->spellChecker setLanguage: this->spellCheckerLanguage];
+    }
     NSData *data = [[NSData alloc] initWithBytesNoCopy:(void *)(text) length:(length * 2) freeWhenDone:NO];
     NSString* string = [[NSString alloc] initWithData:data encoding:NSUTF16LittleEndianStringEncoding];
     NSArray *misspellings = [this->spellChecker checkString:string
@@ -76,6 +86,9 @@ std::vector<MisspelledRange> MacSpellchecker::CheckSpelling(const uint16_t *text
 
 void MacSpellchecker::Add(const std::string& word) {
   @autoreleasepool {
+    if (this->spellCheckerLanguage) {
+      [this->spellChecker setLanguage: this->spellCheckerLanguage];
+    }
     NSString* newWord = [NSString stringWithUTF8String:word.c_str()];
     [this->spellChecker learnWord:newWord];
   }
@@ -85,6 +98,10 @@ std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std
   std::vector<std::string> corrections;
 
   @autoreleasepool {
+    if (this->spellCheckerLanguage) {
+      [this->spellChecker setLanguage: this->spellCheckerLanguage];
+    }
+
     NSString* misspelling = [NSString stringWithUTF8String:word.c_str()];
     NSString* language = [this->spellChecker language];
     NSRange range;
