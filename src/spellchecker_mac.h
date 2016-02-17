@@ -22,6 +22,7 @@ public:
 
 private:
   NSSpellChecker* spellChecker;
+  NSString* spellCheckerLanguage;
 };
 
 }  // namespace spellchecker
