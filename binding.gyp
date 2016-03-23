@@ -2,7 +2,7 @@
   'variables': {
     'conditions': [
       ['OS=="mac"', {
-        'spellchecker_use_hunspell%': 'false',
+        'spellchecker_use_hunspell%': 'true',
       }],
       ['OS=="linux"', {
         'spellchecker_use_hunspell': 'true',

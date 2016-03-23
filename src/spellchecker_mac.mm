@@ -155,11 +155,9 @@ void MacSpellchecker::UpdateGlobalSpellchecker() {
 }
 
 SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker() {
-#ifdef USE_HUNSPELL
   if (getenv("SPELLCHECKER_PREFER_HUNSPELL")) {
     return new HunspellSpellchecker();
   }
-#endif
 
   return new MacSpellchecker();
 }
