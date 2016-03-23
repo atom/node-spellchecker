@@ -158,13 +158,14 @@ describe "SpellChecker", ->
       @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of string dictionary names", ->
+      # NB: getAvailableDictionaries is nop'ped in hunspell and it also doesn't
+      # work inside Appveyor's CI environment
+      return if process.platform is 'linux' or process.env.CI or process.env.SPELLCHECKER_PREFER_HUNSPELL
+
       dictionaries = @fixture.getAvailableDictionaries()
       expect(Array.isArray(dictionaries)).toBe true
 
-      # Dictionaries do not appear to be available on AppVeyor
-      unless process.platform is 'win32' and (process.env.CI or process.env.SPELLCHECKER_PREFER_HUNSPELL)
-        expect(dictionaries.length).toBeGreaterThan 0
-
+      expect(dictionaries.length).toBeGreaterThan 0
       for dictionary in dictionaries.length
         expect(typeof dictionary).toBe 'string'
         expect(diction.length).toBeGreaterThan 0
