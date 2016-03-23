@@ -1,23 +1,25 @@
 {Spellchecker} = require '../lib/spellchecker'
+path = require 'path'
 
 enUS = "A robot is a mechanical or virtual artificial agent, usually an electro-mechanical machine"
 deDE = "Ein Roboter ist eine technische Apparatur, die üblicherweise dazu dient, dem Menschen mechanische Arbeit abzunehmen."
 frFR = "Les robots les plus évolués sont capables de se déplacer et de se recharger par eux-mêmes"
 
 defaultLanguage = if process.platform is 'darwin' then '' else 'en'
+dictionaryDirectory = path.join(__dirname, 'dictionaries')
 
 describe "SpellChecker", ->
   describe ".isMisspelled(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage
+      @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns true if the word is mispelled", ->
-      @fixture.setDictionary('en')
+      @fixture.setDictionary('en', dictionaryDirectory)
       expect(@fixture.isMisspelled('wwoorrddd')).toBe true
 
     it "returns false if the word isn't mispelled", ->
-      @fixture.setDictionary('en')
+      @fixture.setDictionary('en', dictionaryDirectory)
       expect(@fixture.isMisspelled('word')).toBe false
 
     it "throws an exception when no word specified", ->
@@ -35,13 +37,13 @@ describe "SpellChecker", ->
       expect(@fixture.checkSpelling(deDE)).not.toEqual []
       expect(@fixture.checkSpelling(frFR)).not.toEqual []
 
-      if @fixture.setDictionary('de')
+      if @fixture.setDictionary('de', dictionaryDirectory)
         expect(@fixture.checkSpelling(enUS)).not.toEqual []
         expect(@fixture.checkSpelling(deDE)).toEqual []
         expect(@fixture.checkSpelling(frFR)).not.toEqual []
 
       @fixture = new Spellchecker()
-      if @fixture.setDictionary('fr')
+      if @fixture.setDictionary('fr', dictionaryDirectory)
         expect(@fixture.checkSpelling(enUS)).not.toEqual []
         expect(@fixture.checkSpelling(deDE)).not.toEqual []
         expect(@fixture.checkSpelling(frFR)).toEqual []
@@ -50,7 +52,7 @@ describe "SpellChecker", ->
   describe ".checkSpelling(string)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage
+      @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of character ranges of misspelled words", ->
       string = "cat caat dog dooog"
@@ -104,7 +106,7 @@ describe "SpellChecker", ->
   describe ".getCorrectionsForMisspelling(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage
+      @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of possible corrections", ->
       corrections = @fixture.getCorrectionsForMisspelling('worrd')
@@ -117,7 +119,7 @@ describe "SpellChecker", ->
   describe ".add(word) and .remove(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage
+      @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "allows words to be added and removed to the dictionary", ->
       # NB: Windows spellchecker cannot remove words, and since it holds onto
@@ -150,10 +152,9 @@ describe "SpellChecker", ->
 
 
   describe ".getAvailableDictionaries()", ->
-    return if process.platform is 'linux'
-
     beforeEach ->
       @fixture = new Spellchecker()
+      @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of string dictionary names", ->
       dictionaries = @fixture.getAvailableDictionaries()
