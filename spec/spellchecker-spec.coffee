@@ -26,6 +26,27 @@ describe "SpellChecker", ->
       expect(@fixture.checkSpelling(deDE)).toEqual []
       expect(@fixture.checkSpelling(frFR)).toEqual []
 
+    it "correctly switches languages", ->
+      @fixture.setDictionary('en-US')
+
+      expect(@fixture.checkSpelling(enUS)).toEqual []
+      expect(@fixture.checkSpelling(deDE)).not.toEqual []
+      expect(@fixture.checkSpelling(frFR)).not.toEqual []
+
+      @fixture.setDictionary('de-DE')
+
+      expect(@fixture.checkSpelling(enUS)).not.toEqual []
+      expect(@fixture.checkSpelling(deDE)).toEqual []
+      expect(@fixture.checkSpelling(frFR)).not.toEqual []
+
+      @fixture = new Spellchecker()
+      @fixture.setDictionary('fr-FR')
+
+      expect(@fixture.checkSpelling(enUS)).not.toEqual []
+      expect(@fixture.checkSpelling(deDE)).not.toEqual []
+      expect(@fixture.checkSpelling(frFR)).toEqual []
+
+
   describe ".checkSpelling(string)", ->
     beforeEach ->
       @fixture = new Spellchecker()
@@ -108,7 +129,7 @@ describe "SpellChecker", ->
       catch
         errorOccurred = true
       expect(errorOccurred).toBe true
-      
+
     it "remove throws an error if no word is specified", ->
       errorOccurred = false
       try
