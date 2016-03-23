@@ -4,16 +4,20 @@ enUS = "A robot is a mechanical or virtual artificial agent, usually an electro-
 deDE = "Ein Roboter ist eine technische Apparatur, die üblicherweise dazu dient, dem Menschen mechanische Arbeit abzunehmen."
 frFR = "Les robots les plus évolués sont capables de se déplacer et de se recharger par eux-mêmes"
 
+defaultLanguage = if process.platform is 'darwin' then '' else 'en'
+
 describe "SpellChecker", ->
   describe ".isMisspelled(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
+      @fixture.setDictionary defaultLanguage
 
     it "returns true if the word is mispelled", ->
-      @fixture.setDictionary('en-US')
-      expect(@fixture.isMisspelled('wwoorrdd')).toBe true
+      @fixture.setDictionary('en')
+      expect(@fixture.isMisspelled('wwoorrddd')).toBe true
 
     it "returns false if the word isn't mispelled", ->
+      @fixture.setDictionary('en')
       expect(@fixture.isMisspelled('word')).toBe false
 
     it "throws an exception when no word specified", ->
@@ -27,29 +31,26 @@ describe "SpellChecker", ->
       expect(@fixture.checkSpelling(frFR)).toEqual []
 
     it "correctly switches languages", ->
-      @fixture.setDictionary('en-US')
-
       expect(@fixture.checkSpelling(enUS)).toEqual []
       expect(@fixture.checkSpelling(deDE)).not.toEqual []
       expect(@fixture.checkSpelling(frFR)).not.toEqual []
 
-      @fixture.setDictionary('de-DE')
-
-      expect(@fixture.checkSpelling(enUS)).not.toEqual []
-      expect(@fixture.checkSpelling(deDE)).toEqual []
-      expect(@fixture.checkSpelling(frFR)).not.toEqual []
+      if @fixture.setDictionary('de')
+        expect(@fixture.checkSpelling(enUS)).not.toEqual []
+        expect(@fixture.checkSpelling(deDE)).toEqual []
+        expect(@fixture.checkSpelling(frFR)).not.toEqual []
 
       @fixture = new Spellchecker()
-      @fixture.setDictionary('fr-FR')
-
-      expect(@fixture.checkSpelling(enUS)).not.toEqual []
-      expect(@fixture.checkSpelling(deDE)).not.toEqual []
-      expect(@fixture.checkSpelling(frFR)).toEqual []
+      if @fixture.setDictionary('fr')
+        expect(@fixture.checkSpelling(enUS)).not.toEqual []
+        expect(@fixture.checkSpelling(deDE)).not.toEqual []
+        expect(@fixture.checkSpelling(frFR)).toEqual []
 
 
   describe ".checkSpelling(string)", ->
     beforeEach ->
       @fixture = new Spellchecker()
+      @fixture.setDictionary defaultLanguage
 
     it "returns an array of character ranges of misspelled words", ->
       string = "cat caat dog dooog"
@@ -77,6 +78,7 @@ describe "SpellChecker", ->
     it "does not treat non-english letters as word boundaries", ->
       @fixture.add("cliché")
       expect(@fixture.checkSpelling("what cliché nonsense")).toEqual []
+      @fixture.remove("cliché")
 
     it "handles words with apostrophes", ->
       string = "doesn't isn't aint hasn't"
@@ -102,6 +104,7 @@ describe "SpellChecker", ->
   describe ".getCorrectionsForMisspelling(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
+      @fixture.setDictionary defaultLanguage
 
     it "returns an array of possible corrections", ->
       corrections = @fixture.getCorrectionsForMisspelling('worrd')
@@ -114,11 +117,18 @@ describe "SpellChecker", ->
   describe ".add(word) and .remove(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
+      @fixture.setDictionary defaultLanguage
 
     it "allows words to be added and removed to the dictionary", ->
+      # NB: Windows spellchecker cannot remove words, and since it holds onto
+      # words, rerunning this test >1 time causes it to incorrectly fail
+      return if process.platform is 'win32'
+
       expect(@fixture.isMisspelled('wwoorrdd')).toBe true
+
       @fixture.add('wwoorrdd')
       expect(@fixture.isMisspelled('wwoorrdd')).toBe false
+
       @fixture.remove('wwoorrdd')
       expect(@fixture.isMisspelled('wwoorrdd')).toBe true
 
