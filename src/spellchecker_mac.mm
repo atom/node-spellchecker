@@ -21,6 +21,13 @@ MacSpellchecker::~MacSpellchecker() {
 bool MacSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
   @autoreleasepool {
     [this->spellCheckerLanguage release];
+
+    if (language.length() < 1) {
+      this->spellCheckerLanguage = nil;
+      this->UpdateGlobalSpellchecker();
+      return true;
+    }
+
     this->spellCheckerLanguage = [[NSString alloc] initWithUTF8String: language.c_str()];
 
     return [this->spellChecker setLanguage: this->spellCheckerLanguage] == YES;
