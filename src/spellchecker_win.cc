@@ -226,6 +226,12 @@ void WindowsSpellchecker::Add(const std::string& word) {
   this->currentSpellchecker->Add(wword.c_str());
 }
 
+void WindowsSpellchecker::Remove(const std::string& word) {
+  // NB: ISpellChecker has no way to remove words from the dictionary
+  return;
+}
+
+
 std::vector<std::string> WindowsSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   if (this->currentSpellchecker == NULL) {
     return std::vector<std::string>();

@@ -89,22 +89,33 @@ describe "SpellChecker", ->
     it "throws an exception when no word specified", ->
       expect(-> @fixture.getCorrectionsForMisspelling()).toThrow()
 
-  describe ".add(word)", ->
+  describe ".add(word) and .remove(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
 
-    xit "allows words to be added to the dictionary", ->
+    it "allows words to be added and removed to the dictionary", ->
       expect(@fixture.isMisspelled('wwoorrdd')).toBe true
       @fixture.add('wwoorrdd')
       expect(@fixture.isMisspelled('wwoorrdd')).toBe false
+      @fixture.remove('wwoorrdd')
+      expect(@fixture.isMisspelled('wwoorrdd')).toBe true
 
-    it "throws an error if no word is specified", ->
+    it "add throws an error if no word is specified", ->
       errorOccurred = false
       try
         @fixture.add()
       catch
         errorOccurred = true
       expect(errorOccurred).toBe true
+      
+    it "remove throws an error if no word is specified", ->
+      errorOccurred = false
+      try
+        @fixture.remove()
+      catch
+        errorOccurred = true
+      expect(errorOccurred).toBe true
+
 
   describe ".getAvailableDictionaries()", ->
     return if process.platform is 'linux'

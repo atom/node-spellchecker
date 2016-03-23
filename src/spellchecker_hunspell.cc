@@ -118,6 +118,12 @@ void HunspellSpellchecker::Add(const std::string& word) {
   }
 }
 
+void HunspellSpellchecker::Remove(const std::string& word) {
+  if (hunspell) {
+    hunspell->remove(word.c_str());
+  }
+}
+
 std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   std::vector<std::string> corrections;
 

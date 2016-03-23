@@ -99,6 +99,15 @@ void MacSpellchecker::Add(const std::string& word) {
   }
 }
 
+void MacSpellchecker::Remove(const std::string& word) {
+  @autoreleasepool {
+    this->UpdateGlobalSpellchecker();
+
+    NSString* newWord = [NSString stringWithUTF8String:word.c_str()];
+    [this->spellChecker unlearnWord:newWord];
+  }
+}
+
 std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
   std::vector<std::string> corrections;
 
