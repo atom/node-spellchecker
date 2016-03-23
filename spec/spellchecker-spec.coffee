@@ -2,7 +2,7 @@
 
 enUS = "A robot is a mechanical or virtual artificial agent, usually an electro-mechanical machine"
 deDE = "Ein Roboter ist eine technische Apparatur, die üblicherweise dazu dient, dem Menschen mechanische Arbeit abzunehmen."
-frFR = "Un robot est un dispositif mécatronique accomplissant automatiquement"
+frFR = "Les robots les plus évolués sont capables de se déplacer et de se recharger par eux-mêmes"
 
 describe "SpellChecker", ->
   describe ".isMisspelled(word)", ->
@@ -72,10 +72,11 @@ describe "SpellChecker", ->
       ]
 
     it "handles invalid inputs", ->
-      expect(@fixture.checkSpelling("")).toEqual []
-      expect(-> @fixture.checkSpelling()).toThrow("Bad argument")
-      expect(-> @fixture.checkSpelling(null)).toThrow("Bad argument")
-      expect(-> @fixture.checkSpelling({})).toThrow("Bad argument")
+      fixture = @fixture
+      expect(fixture.checkSpelling("")).toEqual []
+      expect(-> fixture.checkSpelling()).toThrow("Bad argument")
+      expect(-> fixture.checkSpelling(null)).toThrow("Bad argument")
+      expect(-> fixture.checkSpelling({})).toThrow("Bad argument")
 
   describe ".getCorrectionsForMisspelling(word)", ->
     beforeEach ->
