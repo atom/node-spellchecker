@@ -24,6 +24,8 @@
     "jasmine-focused": "1.x"
   },
   "dependencies": {
-    "nan": "^2.0.0"
+    "loophole": "^1.1.0",
+    "nan": "^2.0.0",
+    "nodobjc": "^2.1.0"
   }
 }
