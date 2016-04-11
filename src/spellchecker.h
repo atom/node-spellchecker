@@ -29,6 +29,11 @@ public:
   // NB: When using Hunspell, this will not modify the .dic file; custom words must be added each
   // time the spellchecker is created. Use a custom dictionary file.
   virtual void Add(const std::string& word) = 0;
+  
+  // Removes a word from the custom dictionary added by Add.
+  // NB: When using Hunspell, this will not modify the .dic file; custom words must be added each
+  // time the spellchecker is created. Use a custom dictionary file.
+  virtual void Remove(const std::string& word) = 0;
 
   virtual ~SpellcheckerImplementation() {}
 };

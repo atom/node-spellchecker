@@ -98,6 +98,20 @@ class Spellchecker : public Nan::ObjectWrap {
     that->impl->Add(word);
     return;
   }
+  
+  static NAN_METHOD(Remove) {
+    Nan::HandleScope scope;
+    if (info.Length() < 1) {
+      return Nan::ThrowError("Bad argument");
+    }
+
+    Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
+    std::string word = *String::Utf8Value(info[0]);
+
+    that->impl->Remove(word);
+    return;
+  }
+
 
   static NAN_METHOD(GetAvailableDictionaries) {
     Nan::HandleScope scope;
@@ -166,6 +180,7 @@ class Spellchecker : public Nan::ObjectWrap {
     Nan::SetMethod(tpl->InstanceTemplate(), "isMisspelled", Spellchecker::IsMisspelled);
     Nan::SetMethod(tpl->InstanceTemplate(), "checkSpelling", Spellchecker::CheckSpelling);
     Nan::SetMethod(tpl->InstanceTemplate(), "add", Spellchecker::Add);
+    Nan::SetMethod(tpl->InstanceTemplate(), "remove", Spellchecker::Remove);
 
     exports->Set(Nan::New("Spellchecker").ToLocalChecked(), tpl->GetFunction());
   }

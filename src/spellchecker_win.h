@@ -20,6 +20,7 @@ public:
   bool IsMisspelled(const std::string& word);
   std::vector<MisspelledRange> CheckSpelling(const uint16_t *text, size_t length);
   void Add(const std::string& word);
+  void Remove(const std::string& word);
 
 private:
   ISpellChecker* currentSpellchecker;
