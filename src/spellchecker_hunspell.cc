@@ -34,8 +34,17 @@ bool HunspellSpellchecker::AddDictionary(const std::string& language, const std:
   }
   fclose(handle);
 
-  // TODO: On windows locale names are different
-  std::locale loc(lang + ".UTF-8");
+  std::locale loc;
+  try {
+    // On Linux locale requires "UTF-8" suffix; e.g., "en_US.UTF-8"
+    loc = std::locale((lang + ".UTF-8").c_str());
+  } catch (std::runtime_error & e) {
+    // On Windows locale names are different; e.g. en-US
+    std::string langDashed = language;
+    std::replace(langDashed.begin(), langDashed.end(), '_', '-');
+    std::locale loc(langDashed.c_str());
+  }
+
   Hunspell* hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
   hunspells.push_back(std::make_pair(loc, hunspell));
   return true;
