@@ -24,7 +24,7 @@ public:
   void Remove(const std::string& word);
 
 private:
-  ISpellChecker* currentSpellchecker;
+  std::vector<ISpellChecker*> currentSpellcheckers;
   ISpellCheckerFactory* spellcheckerFactory;
 };
 

@@ -56,7 +56,6 @@ std::wstring ToWString(const std::string& string) {
 
 WindowsSpellchecker::WindowsSpellchecker() {
   this->spellcheckerFactory = NULL;
-  this->currentSpellchecker = NULL;
 
   if (InterlockedIncrement(&g_COMRefcount) == 1) {
     g_COMFailed = FAILED(CoInitialize(NULL));
@@ -74,10 +73,11 @@ WindowsSpellchecker::WindowsSpellchecker() {
 }
 
 WindowsSpellchecker::~WindowsSpellchecker() {
-  if (this->currentSpellchecker) {
-    this->currentSpellchecker->Release();
-    this->currentSpellchecker = NULL;
+  for (size_t i = 0; i < this->currentSpellcheckers.size(); ++i) {
+    ISpellChecker* currentSpellchecker = this->currentSpellcheckers[i];
+    currentSpellchecker->Release();
   }
+  this->currentSpellcheckers.clear();
 
   if (this->spellcheckerFactory) {
     this->spellcheckerFactory->Release();
@@ -94,18 +94,8 @@ bool WindowsSpellchecker::IsSupported() {
 }
 
 bool WindowsSpellchecker::AddDictionary(const std::string& language, const std::string& path) {
-  // TODO: write appropriate method
-  return SetDictionary(language, path);
-}
-
-bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
   if (!this->spellcheckerFactory) {
     return false;
-  }
-
-  if (this->currentSpellchecker != NULL) {
-    this->currentSpellchecker->Release();
-    this->currentSpellchecker = NULL;
   }
 
   // Figure out if we have a dictionary installed for the language they want
@@ -123,11 +113,27 @@ bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::
 
   if (!isSupported) return false;
 
-  if (FAILED(this->spellcheckerFactory->CreateSpellChecker(wlanguage.c_str(), &this->currentSpellchecker))) {
+  ISpellChecker* currentSpellchecker = NULL;
+  if (FAILED(this->spellcheckerFactory->CreateSpellChecker(wlanguage.c_str(), &currentSpellchecker))) {
+    return false;
+  }
+  this->currentSpellcheckers.push_back(currentSpellchecker);
+
+  return true;
+}
+
+bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
+  if (!this->spellcheckerFactory) {
     return false;
   }
 
-  return true;
+  for (size_t i = 0; i < this->currentSpellcheckers.size(); ++i) {
+    ISpellChecker* currentSpellchecker = this->currentSpellcheckers[i];
+    currentSpellchecker->Release();
+  }
+  this->currentSpellcheckers.clear();
+
+  return AddDictionary(language, path);
 }
 
 std::vector<std::string> WindowsSpellchecker::GetAvailableDictionaries(const std::string& path) {
@@ -157,78 +163,92 @@ std::vector<std::string> WindowsSpellchecker::GetAvailableDictionaries(const std
 }
 
 bool WindowsSpellchecker::IsMisspelled(const std::string& word) {
-  if (this->currentSpellchecker == NULL) {
+  if (this->currentSpellcheckers.empty()) {
     return false;
   }
 
   IEnumSpellingError* errors = NULL;
   std::wstring wword = ToWString(word);
-  if (FAILED(this->currentSpellchecker->Check(wword.c_str(), &errors))) {
-    return false;
-  }
-
   bool ret;
+  for (size_t i = 0; i < this->currentSpellcheckers.size(); ++i) {
+    ISpellChecker* currentSpellchecker = this->currentSpellcheckers[i];
+    errors = NULL;
+    if (FAILED(currentSpellchecker->Check(wword.c_str(), &errors))) {
+      continue;
+    }
 
-  ISpellingError* dontcare;
-  HRESULT hr = errors->Next(&dontcare);
+    ISpellingError* dontcare;
+    HRESULT hr = errors->Next(&dontcare);
 
-  switch (hr) {
-  case S_OK:
-    // S_OK == There are errors to examine
-    ret = true;
-    dontcare->Release();
-    break;
-  case S_FALSE:
-    // Worked, but error free
-    ret = false;
-    break;
-  default:
-    // Something went pear-shaped
-    ret = false;
-    break;
+    switch (hr) {
+    case S_OK:
+      // S_OK == There are errors to examine
+      ret = true;
+      dontcare->Release();
+      break;
+    case S_FALSE:
+      // Worked, but error free
+      ret = false;
+      break;
+    default:
+      // Something went pear-shaped
+      ret = false;
+      break;
+    }
+
+    errors->Release();
+
+    if (ret == false) {
+      break;
+    }
   }
 
-  errors->Release();
   return ret;
 }
 
 std::vector<MisspelledRange> WindowsSpellchecker::CheckSpelling(const uint16_t *text, size_t length) {
   std::vector<MisspelledRange> result;
 
-  if (this->currentSpellchecker == NULL) {
+  if (this->currentSpellcheckers.empty()) {
     return result;
   }
 
   IEnumSpellingError* errors = NULL;
   std::wstring wtext(reinterpret_cast<const wchar_t *>(text), length);
-  if (FAILED(this->currentSpellchecker->Check(wtext.c_str(), &errors))) {
-    return result;
+
+  // TODO: Intersect results
+  for (size_t i = 0; i < this->currentSpellcheckers.size(); ++i) {
+    ISpellChecker* currentSpellchecker = this->currentSpellcheckers[i];
+    if (FAILED(currentSpellchecker->Check(wtext.c_str(), &errors))) {
+      return result;
+    }
+
+    ISpellingError* error;
+    while (errors->Next(&error) == S_OK) {
+      ULONG start, length;
+      error->get_StartIndex(&start);
+      error->get_Length(&length);
+
+      MisspelledRange range;
+      range.start = start;
+      range.end = start + length;
+      result.push_back(range);
+      error->Release();
+    }
+
+    errors->Release();
   }
 
-  ISpellingError *error;
-  while (errors->Next(&error) == S_OK) {
-    ULONG start, length;
-    error->get_StartIndex(&start);
-    error->get_Length(&length);
-
-    MisspelledRange range;
-    range.start = start;
-    range.end = start + length;
-    result.push_back(range);
-    error->Release();
-  }
-
-  errors->Release();
   return result;
 }
 
 void WindowsSpellchecker::Add(const std::string& word) {
-  if (this->currentSpellchecker == NULL) {
+  if (this->currentSpellcheckers.empty()) {
     return;
   }
 
   std::wstring wword = ToWString(word);
-  this->currentSpellchecker->Add(wword.c_str());
+  this->currentSpellcheckers[0]->Add(wword.c_str());
 }
 
 void WindowsSpellchecker::Remove(const std::string& word) {
@@ -238,37 +258,41 @@ void WindowsSpellchecker::Remove(const std::string& word) {
 
 
 std::vector<std::string> WindowsSpellchecker::GetCorrectionsForMisspelling(const std::string& word) {
-  if (this->currentSpellchecker == NULL) {
+  if (this->currentSpellcheckers.empty()) {
     return std::vector<std::string>();
   }
 
   std::wstring& wword = ToWString(word);
   IEnumString* words = NULL;
-
-  HRESULT hr = this->currentSpellchecker->Suggest(wword.c_str(), &words);
-
-  if (FAILED(hr)) {
-    return std::vector<std::string>();
-  }
-
-  // NB: S_FALSE == word is spelled correctly
-  if (hr == S_FALSE) {
-    words->Release();
-    return std::vector<std::string>();
-  }
-
   std::vector<std::string> ret;
 
-  LPOLESTR correction;
-  while (words->Next(1, &correction, NULL) == S_OK) {
-    std::wstring wcorr;
-    wcorr.assign(correction);
-    ret.push_back(ToUTF8(wcorr));
+  for (size_t i = 0; i < this->currentSpellcheckers.size(); ++i) {
+    ISpellChecker* currentSpellchecker = this->currentSpellcheckers[i];
+    words = NULL;
+    HRESULT hr = this->currentSpellchecker->Suggest(wword.c_str(), &words);
 
-    CoTaskMemFree(correction);
+    if (FAILED(hr)) {
+      continue;
+    }
+
+    // NB: S_FALSE == word is spelled correctly
+    if (hr == S_FALSE) {
+      words->Release();
+      continue;      
+    }
+
+    LPOLESTR correction;
+    while (words->Next(1, &correction, NULL) == S_OK) {
+      std::wstring wcorr;
+      wcorr.assign(correction);
+      ret.push_back(ToUTF8(wcorr));
+
+      CoTaskMemFree(correction);
+    }
+
+    words->Release();
   }
 
-  words->Release();
   return ret;
 }
 
