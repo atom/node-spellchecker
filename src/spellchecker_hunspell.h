@@ -13,6 +13,7 @@ public:
   HunspellSpellchecker();
   ~HunspellSpellchecker();
 
+  bool AddDictionary(const std::string& language, const std::string& path);
   bool SetDictionary(const std::string& language, const std::string& path);
   std::vector<std::string> GetAvailableDictionaries(const std::string& path);
   std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
@@ -22,7 +23,9 @@ public:
   void Remove(const std::string& word);
 
 private:
-  Hunspell* hunspell;
+  bool isAlpha(std::wint_t c);
+
+  std::vector<std::pair<std::locale, Hunspell*>> hunspells;
   Transcoder *transcoder;
 };
 

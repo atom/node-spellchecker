@@ -19,6 +19,25 @@ class Spellchecker : public Nan::ObjectWrap {
     info.GetReturnValue().Set(info.This());
   }
 
+  static NAN_METHOD(AddDictionary) {
+    Nan::HandleScope scope;
+
+    if (info.Length() < 1) {
+      return Nan::ThrowError("Bad argument");
+    }
+
+    Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
+
+    std::string language = *String::Utf8Value(info[0]);
+    std::string directory = ".";
+    if (info.Length() > 1) {
+      directory = *String::Utf8Value(info[1]);
+    }
+
+    bool result = that->impl->AddDictionary(language, directory);
+    info.GetReturnValue().Set(Nan::New(result));
+  }
+
   static NAN_METHOD(SetDictionary) {
     Nan::HandleScope scope;
 
@@ -98,7 +117,7 @@ class Spellchecker : public Nan::ObjectWrap {
     that->impl->Add(word);
     return;
   }
-  
+
   static NAN_METHOD(Remove) {
     Nan::HandleScope scope;
     if (info.Length() < 1) {
@@ -174,6 +193,7 @@ class Spellchecker : public Nan::ObjectWrap {
     tpl->SetClassName(Nan::New<String>("Spellchecker").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
+    Nan::SetMethod(tpl->InstanceTemplate(), "addDictionary", Spellchecker::AddDictionary);
     Nan::SetMethod(tpl->InstanceTemplate(), "setDictionary", Spellchecker::SetDictionary);
     Nan::SetMethod(tpl->InstanceTemplate(), "getAvailableDictionaries", Spellchecker::GetAvailableDictionaries);
     Nan::SetMethod(tpl->InstanceTemplate(), "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);

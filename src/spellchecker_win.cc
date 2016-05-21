@@ -93,6 +93,11 @@ bool WindowsSpellchecker::IsSupported() {
   return !(g_COMFailed || (this->spellcheckerFactory == NULL));
 }
 
+bool WindowsSpellchecker::AddDictionary(const std::string& language, const std::string& path) {
+  // TODO: write appropriate method
+  return SetDictionary(language, path);
+}
+
 bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
   if (!this->spellcheckerFactory) {
     return false;

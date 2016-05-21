@@ -1,6 +1,7 @@
 #ifndef SRC_SPELLCHECKER_H_
 #define SRC_SPELLCHECKER_H_
 
+#include <locale>
 #include <string>
 #include <vector>
 #include <stdint.h>
@@ -14,6 +15,7 @@ struct MisspelledRange {
 
 class SpellcheckerImplementation {
 public:
+  virtual bool AddDictionary(const std::string& language, const std::string& path) = 0;
   virtual bool SetDictionary(const std::string& language, const std::string& path) = 0;
   virtual std::vector<std::string> GetAvailableDictionaries(const std::string& path) = 0;
 
@@ -29,7 +31,7 @@ public:
   // NB: When using Hunspell, this will not modify the .dic file; custom words must be added each
   // time the spellchecker is created. Use a custom dictionary file.
   virtual void Add(const std::string& word) = 0;
-  
+
   // Removes a word from the custom dictionary added by Add.
   // NB: When using Hunspell, this will not modify the .dic file; custom words must be added each
   // time the spellchecker is created. Use a custom dictionary file.

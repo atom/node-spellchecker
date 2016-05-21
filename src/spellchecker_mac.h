@@ -13,6 +13,7 @@ public:
   MacSpellchecker();
   ~MacSpellchecker();
 
+  bool AddDictionary(const std::string& language, const std::string& path);
   bool SetDictionary(const std::string& language, const std::string& path);
   std::vector<std::string> GetAvailableDictionaries(const std::string& path);
   std::vector<std::string> GetCorrectionsForMisspelling(const std::string& word);
@@ -20,7 +21,7 @@ public:
   std::vector<MisspelledRange> CheckSpelling(const uint16_t *text, size_t length);
   void Add(const std::string& word);
   void Remove(const std::string& word);
-  
+
 private:
   NSSpellChecker* spellChecker;
   NSString* spellCheckerLanguage;
