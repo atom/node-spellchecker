@@ -20,6 +20,10 @@ namespace spellchecker {
 LONG g_COMRefcount = 0;
 bool g_COMFailed = false;
 
+static bool compareMisspelledRanges(const MisspelledRange& lhs, const MisspelledRange& rhs) {
+  return lhs.start < rhs.start;
+}
+
 std::string ToUTF8(const std::wstring& string) {
   if (string.length() < 1) {
     return std::string();
@@ -216,12 +220,13 @@ std::vector<MisspelledRange> WindowsSpellchecker::CheckSpelling(const uint16_t *
   IEnumSpellingError* errors = NULL;
   std::wstring wtext(reinterpret_cast<const wchar_t *>(text), length);
 
-  // TODO: Intersect results
   for (size_t i = 0; i < this->currentSpellcheckers.size(); ++i) {
     ISpellChecker* currentSpellchecker = this->currentSpellcheckers[i];
     if (FAILED(currentSpellchecker->Check(wtext.c_str(), &errors))) {
-      return result;
+      continue;
     }
+
+    std::vector<MisspelledRange> currentResult;
 
     ISpellingError* error;
     while (errors->Next(&error) == S_OK) {
@@ -232,11 +237,25 @@ std::vector<MisspelledRange> WindowsSpellchecker::CheckSpelling(const uint16_t *
       MisspelledRange range;
       range.start = start;
       range.end = start + length;
-      result.push_back(range);
+      currentResult.push_back(range);
       error->Release();
     }
 
     errors->Release();
+
+    if (currentResult.empty()) {
+      return std::vector<MisspelledRange>();
+    }
+    if (result.empty()) {
+      std::swap(result, currentResult);
+    } else {
+      std::vector<MisspelledRange> intersection;
+      std::set_intersection(
+        result.begin(), result.end(),
+        currentResult.begin(), currentResult.end(),
+        std::back_inserter(intersection), compareMisspelledRanges);
+      std::swap(result, intersection);
+    }
   }
 
   return result;
