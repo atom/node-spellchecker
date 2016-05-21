@@ -50,12 +50,16 @@
              'src/spellchecker_linux.cc',
              'src/transcoder_posix.cc',
           ],
+          'cflags!': [ '-fno-exceptions' ],
+          'cflags_cc!': [ '-fno-exceptions' ],
         }],
         ['OS=="mac"', {
           'sources': [
             'src/spellchecker_mac.mm',
             'src/transcoder_posix.cc',
           ],
+          'cflags!': [ '-fno-exceptions' ],
+          'cflags_cc!': [ '-fno-exceptions' ],
           'link_settings': {
             'libraries': [
               '$(SDKROOT)/System/Library/Frameworks/AppKit.framework',
