@@ -269,7 +269,7 @@ std::vector<std::string> WindowsSpellchecker::GetCorrectionsForMisspelling(const
   for (size_t i = 0; i < this->currentSpellcheckers.size(); ++i) {
     ISpellChecker* currentSpellchecker = this->currentSpellcheckers[i];
     words = NULL;
-    HRESULT hr = this->currentSpellchecker->Suggest(wword.c_str(), &words);
+    HRESULT hr = currentSpellchecker->Suggest(wword.c_str(), &words);
 
     if (FAILED(hr)) {
       continue;
@@ -278,7 +278,7 @@ std::vector<std::string> WindowsSpellchecker::GetCorrectionsForMisspelling(const
     // NB: S_FALSE == word is spelled correctly
     if (hr == S_FALSE) {
       words->Release();
-      continue;      
+      continue;
     }
 
     LPOLESTR correction;
