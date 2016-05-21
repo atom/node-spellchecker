@@ -166,7 +166,7 @@ std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(cons
   return corrections;
 }
 
-bool HunspellSpellchecker::isAlpha(std::wint_t c) {
+bool HunspellSpellchecker::isAlpha(std::wint_t c) const {
   if (iswalpha(c)) {
     return true;
   }

@@ -23,7 +23,7 @@ public:
   void Remove(const std::string& word);
 
 private:
-  bool isAlpha(std::wint_t c);
+  bool isAlpha(std::wint_t c) const;
 
   std::vector<std::pair<std::locale, Hunspell*>> hunspells;
   Transcoder *transcoder;
