@@ -1,4 +1,5 @@
 {Spellchecker} = require '../lib/spellchecker'
+fs = require 'fs'
 path = require 'path'
 
 enUS = "A robot is a mechanical or virtual artificial agent, usually an electronic machine"
@@ -8,18 +9,22 @@ frFR = "Les robots les plus évolués sont capables de se déplacer et de se rec
 defaultLanguage = if process.platform is 'darwin' then '' else 'en_US'
 dictionaryDirectory = path.join(__dirname, 'dictionaries')
 
+readDictionaryForLang = (lang) ->
+  return new Buffer() unless lang
+  fs.readFileSync(path.join(dictionaryDirectory, "#{lang.replace(/_/g, '-')}.bdic"))
+
 describe "SpellChecker", ->
   describe ".isMisspelled(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage, dictionaryDirectory
+      @fixture.setDictionary defaultLanguage, readDictionaryForLang(defaultLanguage)
 
     it "returns true if the word is mispelled", ->
-      @fixture.setDictionary('en_US', dictionaryDirectory)
+      @fixture.setDictionary('en_US', readDictionaryForLang('en_US'))
       expect(@fixture.isMisspelled('wwoorrddd')).toBe true
 
     it "returns false if the word isn't mispelled", ->
-      @fixture.setDictionary('en_US', dictionaryDirectory)
+      @fixture.setDictionary('en_US', readDictionaryForLang('en_US'))
       expect(@fixture.isMisspelled('word')).toBe false
 
     it "throws an exception when no word specified", ->
@@ -33,18 +38,18 @@ describe "SpellChecker", ->
       expect(@fixture.checkSpelling(frFR)).toEqual []
 
     it "correctly switches languages", ->
-      expect(@fixture.setDictionary('en_US', dictionaryDirectory)).toBe true
+      expect(@fixture.setDictionary('en_US', readDictionaryForLang('en_US'))).toBe true
       expect(@fixture.checkSpelling(enUS)).toEqual []
       expect(@fixture.checkSpelling(deDE)).not.toEqual []
       expect(@fixture.checkSpelling(frFR)).not.toEqual []
 
-      if @fixture.setDictionary('de_DE', dictionaryDirectory)
+      if @fixture.setDictionary('de_DE', readDictionaryForLang('de_DE'))
         expect(@fixture.checkSpelling(enUS)).not.toEqual []
         expect(@fixture.checkSpelling(deDE)).toEqual []
         expect(@fixture.checkSpelling(frFR)).not.toEqual []
 
       @fixture = new Spellchecker()
-      if @fixture.setDictionary('fr_FR', dictionaryDirectory)
+      if @fixture.setDictionary('fr_FR', readDictionaryForLang('fr_FR'))
         expect(@fixture.checkSpelling(enUS)).not.toEqual []
         expect(@fixture.checkSpelling(deDE)).not.toEqual []
         expect(@fixture.checkSpelling(frFR)).toEqual []
@@ -53,7 +58,7 @@ describe "SpellChecker", ->
   describe ".checkSpelling(string)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage, dictionaryDirectory
+      @fixture.setDictionary defaultLanguage, readDictionaryForLang(defaultLanguage)
 
     it "returns an array of character ranges of misspelled words", ->
       string = "cat caat dog dooog"
@@ -107,7 +112,7 @@ describe "SpellChecker", ->
   describe ".getCorrectionsForMisspelling(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage, dictionaryDirectory
+      @fixture.setDictionary defaultLanguage, readDictionaryForLang(defaultLanguage)
 
     it "returns an array of possible corrections", ->
       corrections = @fixture.getCorrectionsForMisspelling('worrd')
@@ -120,7 +125,7 @@ describe "SpellChecker", ->
   describe ".add(word) and .remove(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage, dictionaryDirectory
+      @fixture.setDictionary defaultLanguage, readDictionaryForLang(defaultLanguage)
 
     it "allows words to be added and removed to the dictionary", ->
       # NB: Windows spellchecker cannot remove words, and since it holds onto
@@ -155,7 +160,7 @@ describe "SpellChecker", ->
   describe ".getAvailableDictionaries()", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage, dictionaryDirectory
+      @fixture.setDictionary defaultLanguage, readDictionaryForLang(defaultLanguage)
 
     it "returns an array of string dictionary names", ->
       # NB: getAvailableDictionaries is nop'ped in hunspell and it also doesn't
