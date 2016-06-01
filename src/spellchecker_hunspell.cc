@@ -18,7 +18,7 @@ HunspellSpellchecker::~HunspellSpellchecker() {
   }
 }
 
-bool HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
+bool HunspellSpellchecker::SetDictionary(const std::string& language) {
   if (hunspell) {
     delete hunspell;
     hunspell = NULL;

@@ -18,7 +18,7 @@ MacSpellchecker::~MacSpellchecker() {
   this->spellCheckerLanguage = nil;
 }
 
-bool MacSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
+bool MacSpellchecker::SetDictionary(const std::string& language) {
   @autoreleasepool {
     [this->spellCheckerLanguage release];
 

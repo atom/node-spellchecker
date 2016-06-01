@@ -29,12 +29,8 @@ class Spellchecker : public Nan::ObjectWrap {
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
 
     std::string language = *String::Utf8Value(info[0]);
-    std::string directory = ".";
-    if (info.Length() > 1) {
-      directory = *String::Utf8Value(info[1]);
-    }
-
-    bool result = that->impl->SetDictionary(language, directory);
+    
+    bool result = that->impl->SetDictionary(language);
     info.GetReturnValue().Set(Nan::New(result));
   }
 
