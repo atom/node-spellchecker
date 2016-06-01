@@ -3,8 +3,8 @@ fs = require 'fs'
 path = require 'path'
 
 enUS = "A robot is a mechanical or virtual artificial agent, usually an electronic machine"
-deDE = "Ein Roboter ist eine technische Apparatur, die üblicherweise dazu dient, dem Menschen mechanische Arbeit abzunehmen."
-frFR = "Les robots les plus évolués sont capables de se déplacer et de se recharger par eux-mêmes"
+deDE = "ein Roboter ist eine technische Apparatur, die üblicherweise dazu dient, dem Menschen mechanische Arbeit abzunehmen."
+frFR = "les robots les plus évolués sont capables de se déplacer et de se recharger par eux-mêmes"
 
 defaultLanguage = if process.platform is 'darwin' then '' else 'en_US'
 dictionaryDirectory = path.join(__dirname, 'dictionaries')
