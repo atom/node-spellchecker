@@ -23,23 +23,17 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language) {
     delete hunspell;
     hunspell = NULL;
   }
+  
+  return false; 
+}
 
-  // NB: Hunspell uses underscore to separate language and locale, and Win8 uses
-  // dash - if they use the wrong one, just silently replace it for them
-  std::string lang = language;
-  std::replace(lang.begin(), lang.end(), '-', '_');
-
-  std::string affixpath = dirname + "/" + lang + ".aff";
-  std::string dpath = dirname + "/" + lang + ".dic";
-
-  // TODO: This code is almost certainly jacked on Win32 for non-ASCII paths
-  FILE* handle = fopen(dpath.c_str(), "r");
-  if (!handle) {
-    return false;
+bool HunspellSpellchecker::SetDictionaryToContents(const unsigned char* data, size_t length) {
+  if (hunspell) {
+    delete hunspell;
+    hunspell = NULL;
   }
-  fclose(handle);
 
-  hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
+  hunspell = new Hunspell(data, length);
   return true;
 }
 

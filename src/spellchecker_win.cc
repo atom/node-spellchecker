@@ -125,6 +125,10 @@ bool WindowsSpellchecker::SetDictionary(const std::string& language) {
   return true;
 }
 
+bool WindowsSpellchecker::SetDictionaryToContents(const unsigned char* data, size_t length) {
+  return false;
+}
+
 std::vector<std::string> WindowsSpellchecker::GetAvailableDictionaries(const std::string& path) {
   HRESULT hr;
 

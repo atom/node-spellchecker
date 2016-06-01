@@ -34,6 +34,10 @@ bool MacSpellchecker::SetDictionary(const std::string& language) {
   }
 }
 
+bool MacSpellchecker::SetDictionaryToContents(const unsigned char* data, size_t length) {
+  return false;
+}
+
 std::vector<std::string> MacSpellchecker::GetAvailableDictionaries(const std::string& path) {
   std::vector<std::string> ret;
 

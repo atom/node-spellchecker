@@ -15,6 +15,8 @@ struct MisspelledRange {
 class SpellcheckerImplementation {
 public:
   virtual bool SetDictionary(const std::string& language) = 0;
+  virtual bool SetDictionaryToContents(const unsigned char* data, size_t length) = 0;
+  
   virtual std::vector<std::string> GetAvailableDictionaries(const std::string& path) = 0;
 
   // Returns an array containing possible corrections for the word.
