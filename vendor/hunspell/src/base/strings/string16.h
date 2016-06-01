@@ -187,6 +187,7 @@ class BASE_EXPORT std::basic_string<base::char16, base::string16_char_traits>;
 // Specialize std::hash for base::string16. Although the style guide forbids
 // this in general, it is necessary for consistency with WCHAR_T_IS_UTF16
 // platforms, where base::string16 is a type alias for std::wstring.
+/*
 namespace std {
 template <>
 struct hash<base::string16> {
@@ -198,6 +199,7 @@ struct hash<base::string16> {
   }
 };
 }  // namespace std
+*/
 
 #endif  // WCHAR_T_IS_UTF32
 
