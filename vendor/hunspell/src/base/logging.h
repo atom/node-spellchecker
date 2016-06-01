@@ -3,7 +3,7 @@
 
 // NB: This is a nopped out file just to get stuff to compile
 #define DCHECK(x)
-#define DCHECK_IS_ON() false
+#define DCHECK_IS_ON() 0
 
 #include <memory.h>
 
