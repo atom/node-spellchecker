@@ -89,9 +89,15 @@
             }],
             ['OS=="linux"', {
               'defines': [ 'WCHAR_T_IS_UTF32', ],
+              'sources': [
+                'vendor/hunspell/src/base/strings/string16.cc',
+              ]
             }],
             ['OS=="mac"', {
               'defines': [ 'WCHAR_T_IS_UTF32', ],
+              'sources': [
+                'vendor/hunspell/src/base/strings/string16.cc',
+              ]
             }],
           ],
           'include_dirs': [
@@ -106,8 +112,8 @@
             'vendor/hunspell/src/base/stl_util.h',
             'vendor/hunspell/src/base/strings/string_piece.cc',
             'vendor/hunspell/src/base/strings/string_piece.h',
-            'vendor/hunspell/src/base/strings/string16.cc',
             'vendor/hunspell/src/base/strings/string16.h',
+            'vendor/hunspell/src/build/build.h',
             'vendor/hunspell/src/google/bdict_reader.cc',
             'vendor/hunspell/src/google/bdict_reader.h',
             'vendor/hunspell/src/google/bdict.cc',
