@@ -10,7 +10,7 @@ defaultLanguage = if process.platform is 'darwin' then '' else 'en_US'
 dictionaryDirectory = path.join(__dirname, 'dictionaries')
 
 readDictionaryForLang = (lang) ->
-  return new Buffer() unless lang
+  return new Buffer([]) unless lang
   fs.readFileSync(path.join(dictionaryDirectory, "#{lang.replace(/_/g, '-')}.bdic"))
 
 describe "SpellChecker", ->
