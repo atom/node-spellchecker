@@ -30,7 +30,7 @@ main(int argc, char** argv)
     exit(1);
   }
 
-    TextParser * p = new LaTeXParser("qwertzuiopasdfghjklyxcvbnméáúõûóüöíQWERTZUIOPASDFGHJKLYXCVBNMÍÉÁÕÚÖÜÓÛ");
+    TextParser * p = new LaTeXParser("qwertzuiopasdfghjklyxcvbnmÃ©Ã¡ÃºÃµÃ»Ã³Ã¼Ã¶Ã­QWERTZUIOPASDFGHJKLYXCVBNMÃÃ‰ÃÃ•ÃšÃ–ÃœÃ“Ã›");
     
     char buf[MAXLNLEN];
     char * next;

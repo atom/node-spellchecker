@@ -7,17 +7,37 @@
 
 #include "hunspell.hxx"
 #include "hunspell.h"
+#ifndef HUNSPELL_CHROME_CLIENT
+#ifndef MOZILLA_CLIENT
+#    include "config.h"
+#endif
+#endif
 #include "csutil.hxx"
 
+#ifdef HUNSPELL_CHROME_CLIENT
+Hunspell::Hunspell(const unsigned char* bdict_data, size_t bdict_length)
+#else
 Hunspell::Hunspell(const char * affpath, const char * dpath, const char * key)
+#endif
 {
     encoding = NULL;
     csconv = NULL;
     utf8 = 0;
     complexprefixes = 0;
+#ifndef HUNSPELL_CHROME_CLIENT
     affixpath = mystrdup(affpath);
+#endif
     maxdic = 0;
 
+#ifdef HUNSPELL_CHROME_CLIENT
+    bdict_reader = new hunspell::BDictReader;
+    bdict_reader->Init(bdict_data, bdict_length);
+
+    pHMgr[0] = new HashMgr(bdict_reader);
+    if (pHMgr[0]) maxdic = 1;
+
+    pAMgr = new AffixMgr(bdict_reader, pHMgr, &maxdic);
+#else
     /* first set up the hash manager */
     pHMgr[0] = new HashMgr(dpath, affpath, key);
     if (pHMgr[0]) maxdic = 1;
@@ -25,6 +45,7 @@ Hunspell::Hunspell(const char * affpath, const char * dpath, const char * key)
     /* next set up the affix manager */
     /* it needs access to the hash manager lookup methods */
     pAMgr = new AffixMgr(affpath, pHMgr, &maxdic, key);
+#endif
 
     /* get the preferred try string and the dictionary */
     /* encoding from the Affix Manager for that dictionary */
@@ -38,7 +59,11 @@ Hunspell::Hunspell(const char * affpath, const char * dpath, const char * key)
     wordbreak = pAMgr->get_breaktable();
 
     /* and finally set up the suggestion manager */
+#ifdef HUNSPELL_CHROME_CLIENT
+    pSMgr = new SuggestMgr(bdict_reader, try_string, MAXSUGGESTION, pAMgr);
+#else
     pSMgr = new SuggestMgr(try_string, MAXSUGGESTION, pAMgr);
+#endif
     if (try_string) free(try_string);
 }
 
@@ -56,10 +81,16 @@ Hunspell::~Hunspell()
     csconv= NULL;
     if (encoding) free(encoding);
     encoding = NULL;
+#ifdef HUNSPELL_CHROME_CLIENT
+    if (bdict_reader) delete bdict_reader;
+    bdict_reader = NULL;
+#else
     if (affixpath) free(affixpath);
     affixpath = NULL;
+#endif
 }
 
+#ifndef HUNSPELL_CHROME_CLIENT
 // load extra dictionaries
 int Hunspell::add_dic(const char * dpath, const char * key) {
     if (maxdic == MAXDIC || !affixpath) return 1;
@@ -67,6 +98,7 @@ int Hunspell::add_dic(const char * dpath, const char * key) {
     if (pHMgr[maxdic]) maxdic++; else return 1;
     return 0;
 }
+#endif
 
 // make a copy of src at destination while removing all leading
 // blanks and removing any trailing periods after recording
@@ -319,6 +351,9 @@ int Hunspell::insert_sug(char ***slst, char * word, int ns) {
 
 int Hunspell::spell(const char * word, int * info, char ** root)
 {
+#ifdef HUNSPELL_CHROME_CLIENT
+  if (pHMgr[0]) pHMgr[0]->EmptyHentryCache();
+#endif
   struct hentry * rv=NULL;
   // need larger vector. For example, Turkish capital letter I converted a
   // 2-byte UTF-8 character (dotless i) by mkallsmall.
@@ -583,6 +618,13 @@ struct hentry * Hunspell::checkword(const char * w, int * info, char ** root)
   if (!len)
       return NULL;
 
+#ifdef HUNSPELL_CHROME_CLIENT
+  // We need to check if the word length is valid to make coverity (Event
+  // fixed_size_dest: Possible overrun of N byte fixed size buffer) happy.
+  if ((utf8 && strlen(word) >= MAXWORDUTF8LEN) || (!utf8 && strlen(word) >= MAXWORDLEN))
+    return NULL;
+#endif
+
   // word reversing wrapper for complex prefixes
   if (complexprefixes) {
     if (word != w2) {
@@ -672,6 +714,9 @@ struct hentry * Hunspell::checkword(const char * w, int * info, char ** root)
 
 int Hunspell::suggest(char*** slst, const char * word)
 {
+#ifdef HUNSPELL_CHROME_CLIENT
+  if (pHMgr[0]) pHMgr[0]->EmptyHentryCache();
+#endif
   int onlycmpdsug = 0;
   char cw[MAXWORDUTF8LEN];
   char wspace[MAXWORDUTF8LEN];
@@ -1691,11 +1736,11 @@ int Hunspell::get_xml_list(char ***slst, char * list, const char * tag) {
     int n = 0;
     char * p;
     if (!list) return 0;
-    for (p = list; (p = strstr(p, tag)); p++) n++;
+    for (p = list; ((p = strstr(p, tag)) != NULL); p++) n++;
     if (n == 0) return 0;
     *slst = (char **) malloc(sizeof(char *) * n);
     if (!*slst) return 0;
-    for (p = list, n = 0; (p = strstr(p, tag)); p++, n++) {
+    for (p = list, n = 0; ((p = strstr(p, tag)) != NULL); p++, n++) {
         int l = strlen(p);
         (*slst)[n] = (char *) malloc(l + 1);
         if (!(*slst)[n]) return n;
@@ -1750,9 +1795,9 @@ int Hunspell::spellml(char*** slst, const char * word)
             return generate(slst, cw, cw2);
         }
       } else {
-        if ((q2 = strstr(q2 + 1, "<code"))) {
+        if ((q2 = strstr(q2 + 1, "<code")) != NULL) {
           char ** slst2;
-          if ((n = get_xml_list(&slst2, strchr(q2, '>'), "<a>"))) {
+          if ((n = get_xml_list(&slst2, strchr(q2, '>'), "<a>")) != 0) {
             int n2 = generate(slst, cw, slst2, n);
             freelist(&slst2, n);
             return uniqlist(*slst, n2);
@@ -1918,13 +1963,21 @@ char * Hunspell::morph_with_correction(const char * word)
 
 Hunhandle *Hunspell_create(const char * affpath, const char * dpath)
 {
+#ifdef HUNSPELL_CHROME_CLIENT
+        return NULL;
+#else
         return (Hunhandle*)(new Hunspell(affpath, dpath));
+#endif
 }
 
 Hunhandle *Hunspell_create_key(const char * affpath, const char * dpath,
     const char * key)
 {
+#ifdef HUNSPELL_CHROME_CLIENT
+        return NULL;
+#else
         return (Hunhandle*)(new Hunspell(affpath, dpath, key));
+#endif
 }
 
 void Hunspell_destroy(Hunhandle *pHunspell)

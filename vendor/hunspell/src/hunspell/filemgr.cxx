@@ -7,6 +7,32 @@
 
 #include "filemgr.hxx"
 
+#ifdef HUNSPELL_CHROME_CLIENT
+#include "google/bdict_reader.h"
+
+FileMgr::FileMgr(hunspell::LineIterator* iterator) : iterator_(iterator) {
+}
+
+FileMgr::~FileMgr() {
+}
+
+char * FileMgr::getline() {
+  // Read one line from a BDICT file and store the line to our line buffer.
+  // To emulate the original FileMgr::getline(), this function returns
+  // the pointer to our line buffer if we can read a line without errors.
+  // Otherwise, this function returns NULL.
+  bool result = iterator_->AdvanceAndCopy(line_, BUFSIZE - 1);
+  return result ? line_ : NULL;
+}
+
+int FileMgr::getlinenum() {
+  // This function is used only for displaying a line number that causes a
+  // parser error. For a BDICT file, providing a line number doesn't help
+  // identifying the place where causes a parser error so much since it is a
+  // binary file. So, we just return 0.
+  return 0;
+}
+#else
 int FileMgr::fail(const char * err, const char * par) {
     fprintf(stderr, err, par);
     return -1;
@@ -39,7 +65,7 @@ char * FileMgr::getline() {
     const char * l;
     linenum++;
     if (fin) return fgets(in, BUFSIZE - 1, fin);
-    if (hin && (l = hin->getline())) return strcpy(in, l);
+    if (hin && ((l = hin->getline()) != NULL)) return strcpy(in, l);
     linenum--;
     return NULL;
 }
@@ -47,3 +73,4 @@ char * FileMgr::getline() {
 int FileMgr::getlinenum() {
     return linenum;
 }
+#endif
