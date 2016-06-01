@@ -81,7 +81,6 @@
           'defines': [
             'HUNSPELL_STATIC',
             'HUNSPELL_CHROME_CLIENT',
-            'OPENOFFICEORG',
           ],
           'conditions': [
             ['OS=="win"', {
