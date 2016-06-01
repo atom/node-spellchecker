@@ -10,7 +10,7 @@ namespace {
 
 class Spellchecker : public Nan::ObjectWrap {
   SpellcheckerImplementation* impl;
-  v8::Local<v8::Value> dictData;
+  v8::Persistent<v8::Value> dictData;
 
   static NAN_METHOD(New) {
     Nan::HandleScope scope;
@@ -36,7 +36,7 @@ class Spellchecker : public Nan::ObjectWrap {
       }
       
       // NB: We must guarantee that we pin this Buffer
-      that->dictData = info[1];
+      that->dictData.Reset(info.GetIsolate(), info[1]);
       has_contents = true;
     }
 
