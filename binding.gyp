@@ -57,6 +57,9 @@
           'defines': [ 'WCHAR_T_IS_UTF32' ],
         }],
         ['OS=="mac"', {
+          'xcode_settings': {
+            'SDKROOT': 'macosx10.11'
+          },
           'sources': [
             'src/spellchecker_mac.mm',
             'src/transcoder_posix.cc',
