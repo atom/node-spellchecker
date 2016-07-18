@@ -40,6 +40,17 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language, const std:
   fclose(handle);
 
   hunspell = new Hunspell(affixpath.c_str(), dpath.c_str());
+  
+  std::string cpath = dirname + "/custom.dic";
+
+  // TODO: This code is almost certainly jacked on Win32 for non-ASCII paths
+  handle = fopen(cpath.c_str(), "r");
+  if (handle != NULL) {
+    // Its a valid file, try and use it.
+    fclose(handle);
+    hunspell->add_dic(cpath.c_str());
+  }
+  
   return true;
 }
 
