@@ -69,7 +69,7 @@ bool MacSpellchecker::IsMisspelled(const std::string& word) {
       language: this->spellChecker.language
       inSpellDocumentWithTag: 0];
 
-    result = range.length > 0 || correction !== nil;
+    result = range.length > 0 || correction != nil;
   }
 
   return result;
@@ -99,8 +99,8 @@ std::vector<MisspelledRange> MacSpellchecker::CheckSpelling(const uint16_t *text
 
     // NB: Corrections will actually return nothing for checkString
     // but _will_ return a correction. 'distopia' will trigger this bug on 10.12
-    NSString* correction = [this->spellChecker correctionForWordRange:NSMakeRange(0, misspelling.length)
-      inString: misspelling
+    NSString* correction = [this->spellChecker correctionForWordRange:NSMakeRange(0, string.length)
+      inString: string
       language: this->spellChecker.language
       inSpellDocumentWithTag: 0];
 
