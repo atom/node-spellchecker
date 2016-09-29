@@ -62,7 +62,14 @@ bool MacSpellchecker::IsMisspelled(const std::string& word) {
     NSRange range = [this->spellChecker checkSpellingOfString:misspelling
                                                    startingAt:0];
 
-    result = range.length > 0;
+    // NB: Corrections will actually return nothing for checkSpellingOfString
+    // but _will_ return a correction. 'distopia' will trigger this bug on 10.12
+    NSString* correction = [this->spellChecker correctionForWordRange:NSMakeRange(0, misspelling.length)
+      inString: misspelling
+      language: this->spellChecker.language
+      inSpellDocumentWithTag: 0];
+
+    result = range.length > 0 || correction !== nil;
   }
 
   return result;
@@ -87,6 +94,21 @@ std::vector<MisspelledRange> MacSpellchecker::CheckSpelling(const uint16_t *text
       MisspelledRange range;
       range.start = misspelling.range.location;
       range.end = misspelling.range.location + misspelling.range.length;
+      result.push_back(range);
+    }
+
+    // NB: Corrections will actually return nothing for checkString
+    // but _will_ return a correction. 'distopia' will trigger this bug on 10.12
+    NSString* correction = [this->spellChecker correctionForWordRange:NSMakeRange(0, misspelling.length)
+      inString: misspelling
+      language: this->spellChecker.language
+      inSpellDocumentWithTag: 0];
+
+    // NB: This is blatantly wrong
+    if (correction) {
+      MisspelledRange range;
+      range.start = 0;
+      range.end = correction.length;
       result.push_back(range);
     }
   }
@@ -134,6 +156,17 @@ std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std
 
     for (size_t i = 0; i < guesses.count; ++i) {
       corrections.push_back([[guesses objectAtIndex:i] UTF8String]);
+    }
+
+    // NB: Corrections will actually return nothing for checkString
+    // but _will_ return a correction. 'distopia' will trigger this bug on 10.12
+    NSString* correction = [this->spellChecker correctionForWordRange:NSMakeRange(0, misspelling.length)
+      inString: misspelling
+      language: this->spellChecker.language
+      inSpellDocumentWithTag: 0];
+
+    if (correction) {
+      corrections.push_back([correction UTF8String]);
     }
   }
 
