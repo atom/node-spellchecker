@@ -69,7 +69,9 @@ bool MacSpellchecker::IsMisspelled(const std::string& word) {
       language: this->spellChecker.language
       inSpellDocumentWithTag: 0];
 
-    result = range.length > 0 || correction != nil;
+    if (correction) return true;
+
+    result = range.length > 0;
   }
 
   return result;
