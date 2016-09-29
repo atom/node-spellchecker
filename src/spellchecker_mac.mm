@@ -168,7 +168,11 @@ std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std
       inSpellDocumentWithTag: 0];
 
     if (correction) {
-      corrections.push_back([correction UTF8String]);
+      std::string to_find = [correction UTF8String];
+
+      if (find(corrections.begin(), corrections.end(), to_find) == corrections.end()) {
+        corrections.push_back(to_find);
+      }
     }
   }
 
