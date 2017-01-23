@@ -10,6 +10,7 @@ namespace {
 
 class Spellchecker : public Nan::ObjectWrap {
   SpellcheckerImplementation* impl;
+  v8::Persistent<v8::Value> dictData;
 
   static NAN_METHOD(New) {
     Nan::HandleScope scope;
@@ -25,16 +26,31 @@ class Spellchecker : public Nan::ObjectWrap {
     if (info.Length() < 1) {
       return Nan::ThrowError("Bad argument");
     }
-
+    
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
-
-    std::string language = *String::Utf8Value(info[0]);
-    std::string directory = ".";
+    
+    bool has_contents = false; 
     if (info.Length() > 1) {
-      directory = *String::Utf8Value(info[1]);
+      if (!node::Buffer::HasInstance(info[1])) {
+        return Nan::ThrowError("SetDictionary 2nd argument must be a Buffer");
+      }
+      
+      // NB: We must guarantee that we pin this Buffer
+      that->dictData.Reset(info.GetIsolate(), info[1]);
+      has_contents = true;
     }
 
-    bool result = that->impl->SetDictionary(language, directory);
+    std::string language = *String::Utf8Value(info[0]);
+    
+    bool result;
+    if (has_contents) {
+      result = that->impl->SetDictionaryToContents(
+        (unsigned char*)node::Buffer::Data(info[1]), 
+        node::Buffer::Length(info[1]));
+    } else {
+      result = that->impl->SetDictionary(language);
+    }
+    
     info.GetReturnValue().Set(Nan::New(result));
   }
 

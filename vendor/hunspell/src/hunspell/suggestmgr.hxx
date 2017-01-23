@@ -52,7 +52,11 @@ class LIBHUNSPELL_DLL_EXPORTED SuggestMgr
 
 
 public:
+#ifdef HUNSPELL_CHROME_CLIENT
+  SuggestMgr(hunspell::BDictReader* reader, const char * tryme, int maxn, AffixMgr *aptr);
+#else
   SuggestMgr(const char * tryme, int maxn, AffixMgr *aptr);
+#endif
   ~SuggestMgr();
 
   int suggest(char*** slst, const char * word, int nsug, int * onlycmpdsug);
@@ -66,6 +70,10 @@ public:
   char * suggest_morph_for_spelling_error(const char * word);
 
 private:
+#ifdef HUNSPELL_CHROME_CLIENT
+   // Not owned by us, owned by the Hunspell object.
+   hunspell::BDictReader* bdict_reader;
+#endif
    int testsug(char** wlst, const char * candidate, int wl, int ns, int cpdsuggest,
      int * timer, clock_t * timelimit);
    int checkword(const char *, int, int, int *, clock_t *);

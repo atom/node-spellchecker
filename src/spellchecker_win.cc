@@ -93,7 +93,7 @@ bool WindowsSpellchecker::IsSupported() {
   return !(g_COMFailed || (this->spellcheckerFactory == NULL));
 }
 
-bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
+bool WindowsSpellchecker::SetDictionary(const std::string& language) {
   if (!this->spellcheckerFactory) {
     return false;
   }
@@ -123,6 +123,10 @@ bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::
   }
 
   return true;
+}
+
+bool WindowsSpellchecker::SetDictionaryToContents(const unsigned char* data, size_t length) {
+  return false;
 }
 
 std::vector<std::string> WindowsSpellchecker::GetAvailableDictionaries(const std::string& path) {

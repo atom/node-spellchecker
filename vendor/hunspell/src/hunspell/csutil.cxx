@@ -5468,7 +5468,15 @@ struct cs_info * get_current_cs(const char * es) {
 // conversion tables static in this file, create them when needed
 // with help the mozilla backend.
 struct cs_info * get_current_cs(const char * es) {
-  struct cs_info *ccs;
+  struct cs_info *ccs = new cs_info[256];
+  // Initialze the array with dummy data so that we wouldn't need
+  // to return null in case of failures.
+  for (int i = 0; i <= 0xff; ++i) {
+    ccs[i].ccase = false;
+    ccs[i].clower = i;
+    ccs[i].cupper = i;
+  }
+
 
   nsCOMPtr<nsIUnicodeEncoder> encoder; 
   nsCOMPtr<nsIUnicodeDecoder> decoder; 
@@ -5476,21 +5484,19 @@ struct cs_info * get_current_cs(const char * es) {
   nsresult rv;
   nsCOMPtr<nsICharsetConverterManager> ccm = do_GetService(kCharsetConverterManagerCID, &rv);
   if (NS_FAILED(rv))
-    return nsnull;
+    return ccs;
 
   rv = ccm->GetUnicodeEncoder(es, getter_AddRefs(encoder));
   if (NS_FAILED(rv))
-    return nsnull;
+    return ccs;
   encoder->SetOutputErrorBehavior(encoder->kOnError_Signal, nsnull, '?');
   rv = ccm->GetUnicodeDecoder(es, getter_AddRefs(decoder));
   if (NS_FAILED(rv))
-    return nsnull;
+    return ccs;
   decoder->SetInputErrorBehavior(decoder->kOnError_Signal);
 
   if (NS_FAILED(rv))
-    return nsnull;
-
-  ccs = new cs_info[256];
+    return ccs;
 
   for (unsigned int i = 0; i <= 0xff; ++i) {
     PRBool success = PR_FALSE;
@@ -5653,7 +5659,7 @@ unsigned short unicodetoupper(unsigned short c, int langnum)
   if (c == 0x0069 && ((langnum == LANG_az) || (langnum == LANG_tr)))
     return 0x0130;
 #ifdef OPENOFFICEORG
-  return u_toupper(c);
+  return static_cast<unsigned short>(u_toupper(c));
 #else
 #ifdef MOZILLA_CLIENT
   return ToUpperCase((PRUnichar) c);
@@ -5671,7 +5677,7 @@ unsigned short unicodetolower(unsigned short c, int langnum)
   if (c == 0x0049 && ((langnum == LANG_az) || (langnum == LANG_tr)))
     return 0x0131;
 #ifdef OPENOFFICEORG
-  return u_tolower(c);
+  return static_cast<unsigned short>(u_tolower(c));
 #else
 #ifdef MOZILLA_CLIENT
   return ToLowerCase((PRUnichar) c);

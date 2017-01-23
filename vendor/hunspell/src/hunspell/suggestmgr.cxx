@@ -12,9 +12,114 @@
 
 const w_char W_VLINE = { '\0', '|' };
 
+#ifdef HUNSPELL_CHROME_CLIENT
+namespace {
+// A simple class which creates temporary hentry objects which are available
+// only in a scope. To conceal memory operations from SuggestMgr functions,
+// this object automatically deletes all hentry objects created through
+// CreateScopedHashEntry() calls in its destructor. So, the following snippet
+// raises a memory error.
+//
+//   hentry* bad_copy = NULL;
+//   {
+//     ScopedHashEntryFactory factory;
+//     hentry* scoped_copy = factory.CreateScopedHashEntry(0, source);
+//     ...
+//     bad_copy = scoped_copy;
+//   }
+//   if (bad_copy->word[0])  // memory for scoped_copy has been deleted!
+//
+// As listed in the above snippet, it is simple to use this class.
+// 1. Declare an instance of this ScopedHashEntryFactory, and;
+// 2. Call its CreateHashEntry() member instead of using 'new hentry' or
+//    'operator='.
+//
+class ScopedHashEntryFactory {
+ public:
+  ScopedHashEntryFactory();
+  ~ScopedHashEntryFactory();
+
+  // Creates a temporary copy of the given hentry struct.
+  // The returned copy is available only while this object is available.
+  // NOTE: this function just calls memcpy() in creating a copy of the given
+  // hentry struct, i.e. it does NOT copy objects referred by pointers of the
+  // given hentry struct.
+  hentry* CreateScopedHashEntry(int index, const hentry* source);
+
+ private:
+  // A struct which encapsulates the new hentry struct introduced in hunspell
+  // 1.2.8. For a pointer to an hentry struct 'h', hunspell 1.2.8 stores a word
+  // (including a NUL character) into 'h->word[0]',...,'h->word[h->blen]' even
+  // though arraysize(h->word[]) is 1. Also, it changed 'astr' to a pointer so
+  // it can store affix flags into 'h->astr[0]',...,'h->astr[alen-1]'. To handle
+  // this new hentry struct, we define a struct which combines three values: an
+  // hentry struct 'hentry'; a char array 'word[kMaxWordLen]', and; an unsigned
+  // short array 'astr' so a hentry struct 'h' returned from
+  // CreateScopedHashEntry() satisfies the following equations:
+  //   hentry* h = factory.CreateScopedHashEntry(0, source);
+  //   h->word[0] == ((HashEntryItem*)h)->entry.word[0].
+  //   h->word[1] == ((HashEntryItem*)h)->word[0].
+  //   ...
+  //   h->word[h->blen] == ((HashEntryItem*)h)->word[h->blen-1].
+  //   h->astr[0] == ((HashEntryItem*)h)->astr[0].
+  //   h->astr[1] == ((HashEntryItem*)h)->astr[1].
+  //   ...
+  //   h->astr[h->alen-1] == ((HashEntryItem*)h)->astr[h->alen-1].
+  enum {
+    kMaxWordLen = 128,
+    kMaxAffixLen = 8,
+  };
+  struct HashEntryItem {
+    hentry entry;
+    char word[kMaxWordLen];
+    unsigned short astr[kMaxAffixLen];
+  };
+
+  HashEntryItem hash_items_[MAX_ROOTS];
+};
+
+ScopedHashEntryFactory::ScopedHashEntryFactory() {
+  memset(&hash_items_[0], 0, sizeof(hash_items_));
+}
+
+ScopedHashEntryFactory::~ScopedHashEntryFactory() {
+}
+
+hentry* ScopedHashEntryFactory::CreateScopedHashEntry(int index,
+                                                      const hentry* source) {
+  if (index >= MAX_ROOTS || source->blen >= kMaxWordLen)
+    return NULL;
+
+  // Retrieve a HashEntryItem struct from our spool, initialize it, and
+  // returns the address of its 'hentry' member.
+  size_t source_size = sizeof(hentry) + source->blen + 1;
+  HashEntryItem* hash_item = &hash_items_[index];
+  memcpy(&hash_item->entry, source, source_size);
+  if (source->astr) {
+    hash_item->entry.alen = source->alen;
+    if (hash_item->entry.alen > kMaxAffixLen)
+      hash_item->entry.alen = kMaxAffixLen;
+    memcpy(hash_item->astr, source->astr, hash_item->entry.alen * sizeof(hash_item->astr[0]));
+    hash_item->entry.astr = &hash_item->astr[0];
+  }
+  return &hash_item->entry;
+}
+
+}  // namespace
+#endif
+
+
+#ifdef HUNSPELL_CHROME_CLIENT
+SuggestMgr::SuggestMgr(hunspell::BDictReader* reader,
+                       const char * tryme, int maxn, 
+                       AffixMgr * aptr)
+{
+  bdict_reader = reader;
+#else
 SuggestMgr::SuggestMgr(const char * tryme, int maxn, 
                        AffixMgr * aptr)
 {
+#endif
 
   // register affix manager and check in string of chars to 
   // try when building candidate suggestions
@@ -407,6 +512,49 @@ int SuggestMgr::replchars(char** wlst, const char * word, int ns, int cpdsuggest
   int lenr, lenp;
   int wl = strlen(word);
   if (wl < 2 || ! pAMgr) return ns;
+  
+#ifdef HUNSPELL_CHROME_CLIENT
+  const char *pattern, *pattern2;
+  hunspell::ReplacementIterator iterator = bdict_reader->GetReplacementIterator();
+  while (iterator.GetNext(&pattern, &pattern2)) {
+      r = word;
+      lenr = strlen(pattern2);
+      lenp = strlen(pattern);
+      
+      // search every occurence of the pattern in the word
+      while ((r=strstr(r, pattern)) != NULL) {
+          strcpy(candidate, word);
+          if (r-word + lenr + strlen(r+lenp) >= MAXLNLEN) break;
+          strcpy(candidate+(r-word), pattern2);
+          strcpy(candidate+(r-word)+lenr, r+lenp);
+          ns = testsug(wlst, candidate, wl-lenp+lenr, ns, cpdsuggest, NULL, NULL);
+          if (ns == -1) return -1;
+          // check REP suggestions with space
+          char * sp = strchr(candidate, ' ');
+          if (sp) {
+            char * prev = candidate;
+            while (sp) {
+              *sp = '\0';
+              if (checkword(prev, strlen(prev), 0, NULL, NULL)) {
+                int oldns = ns;
+                *sp = ' ';
+                ns = testsug(wlst, sp + 1, strlen(sp + 1), ns, cpdsuggest, NULL, NULL);
+                if (ns == -1) return -1;
+                if (oldns < ns) {
+                  free(wlst[ns - 1]);
+                  wlst[ns - 1] = mystrdup(candidate);
+                  if (!wlst[ns - 1]) return -1;
+                }
+              }
+              *sp = ' ';
+              prev = sp + 1;
+              sp = strchr(prev, ' ');
+            }
+          }
+          r++; // search for the next letter
+    }
+  }
+#else
   int numrep = pAMgr->get_numrep();
   struct replentry* reptable = pAMgr->get_reptable();
   if (reptable==NULL) return ns;
@@ -448,6 +596,7 @@ int SuggestMgr::replchars(char** wlst, const char * word, int ns, int cpdsuggest
           r++; // search for the next letter
       }
    }
+#endif
    return ns;
 }
 
@@ -678,7 +827,9 @@ int SuggestMgr::extrachar(char** wlst, const char * word, int ns, int cpdsuggest
 // error is missing a letter it needs
 int SuggestMgr::forgotchar(char ** wlst, const char * word, int ns, int cpdsuggest)
 {
-   char candidate[MAXSWUTF8L];
+   // TODO(rouslan): Remove the interim change below when this patch lands:
+   // http://sf.net/tracker/?func=detail&aid=3595024&group_id=143754&atid=756395
+   char candidate[MAXSWUTF8L + 4];
    char * p;
    clock_t timelimit = clock();
    int timer = MINTIMER;
@@ -700,8 +851,10 @@ int SuggestMgr::forgotchar(char ** wlst, const char * word, int ns, int cpdsugge
 // error is missing a letter it needs
 int SuggestMgr::forgotchar_utf(char ** wlst, const w_char * word, int wl, int ns, int cpdsuggest)
 {
-   w_char  candidate_utf[MAXSWL];
-   char    candidate[MAXSWUTF8L];
+   // TODO(rouslan): Remove the interim change below when this patch lands:
+   // http://sf.net/tracker/?func=detail&aid=3595024&group_id=143754&atid=756395
+   w_char  candidate_utf[MAXSWL + 1];
+   char    candidate[MAXSWUTF8L + 4];
    w_char * p;
    clock_t timelimit = clock();
    int timer = MINTIMER;
@@ -1057,6 +1210,9 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr** pHMgr, int md
 
   struct hentry* hp = NULL;
   int col = -1;
+#ifdef HUNSPELL_CHROME_CLIENT
+  ScopedHashEntryFactory hash_entry_factory;
+#endif
   phonetable * ph = (pAMgr) ? pAMgr->get_phonetable() : NULL;
   char target[MAXSWUTF8L];
   char candidate[MAXSWUTF8L];
@@ -1115,7 +1271,11 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr** pHMgr, int md
 
     if (sc > scores[lp]) {
       scores[lp] = sc;  
+#ifdef HUNSPELL_CHROME_CLIENT
+      roots[lp] = hash_entry_factory.CreateScopedHashEntry(lp, hp);
+#else
       roots[lp] = hp;
+#endif
       lval = sc;
       for (j=0; j < MAX_ROOTS; j++)
         if (scores[j] < lval) {
@@ -1948,16 +2108,14 @@ void SuggestMgr::lcs(const char * s, const char * s2, int * l1, int * l2, char *
     m = strlen(s);
     n = strlen(s2);
   }
-  c = (char *) malloc((m + 1) * (n + 1));
-  b = (char *) malloc((m + 1) * (n + 1));
+  c = (char *) calloc(m + 1, n + 1);
+  b = (char *) calloc(m + 1, n + 1);
   if (!c || !b) {
     if (c) free(c);
     if (b) free(b);
     *result = NULL;
     return;
   }
-  for (i = 1; i <= m; i++) c[i*(n+1)] = 0;
-  for (j = 0; j <= n; j++) c[j] = 0;
   for (i = 1; i <= m; i++) {
     for (j = 1; j <= n; j++) {
       if ( ((utf8) && (*((short *) su+i-1) == *((short *)su2+j-1)))

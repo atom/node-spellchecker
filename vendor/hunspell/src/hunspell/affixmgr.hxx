@@ -18,6 +18,40 @@
 class PfxEntry;
 class SfxEntry;
 
+#ifdef HUNSPELL_CHROME_CLIENT
+
+#include <vector>
+
+// This class provides an implementation of the contclasses array in AffixMgr
+// that is normally a large static array. We should almost never need more than
+// 256 elements, so this class only allocates that much to start off with. If
+// elements higher than that are actually used, we'll automatically expand.
+class ContClasses {
+ public:
+  ContClasses() {
+    // Pre-allocate a buffer so that typically, we'll never have to resize.
+    EnsureSizeIs(256);
+  }
+
+  char& operator[](size_t index) {
+    EnsureSizeIs(index + 1);
+    return data[index];
+  }
+
+  void EnsureSizeIs(size_t new_size) {
+    if (data.size() >= new_size)
+      return;  // Nothing to do.
+
+    size_t old_size = data.size();
+    data.resize(new_size);
+    memset(&data[old_size], 0, new_size - old_size);
+  }
+
+  std::vector<char> data;
+};
+
+#endif  // HUNSPELL_CHROME_CLIENT
+
 class LIBHUNSPELL_DLL_EXPORTED AffixMgr
 {
 
@@ -41,6 +75,7 @@ class LIBHUNSPELL_DLL_EXPORTED AffixMgr
   FLAG                compoundroot;
   FLAG                compoundforbidflag;
   FLAG                compoundpermitflag;
+  int                 compoundmoresuffixes;
   int                 checkcompounddup;
   int                 checkcompoundrep;
   int                 checkcompoundcase;
@@ -105,12 +140,20 @@ class LIBHUNSPELL_DLL_EXPORTED AffixMgr
   int                 fullstrip;
 
   int                 havecontclass; // boolean variable
+#ifdef HUNSPELL_CHROME_CLIENT
+  ContClasses         contclasses;
+#else
   char                contclasses[CONTSIZE]; // flags of possible continuing classes (twofold affix)
+#endif
 
 public:
 
+#ifdef HUNSPELL_CHROME_CLIENT
+  AffixMgr(hunspell::BDictReader* reader, HashMgr** ptr, int * md);
+#else
   AffixMgr(const char * affpath, HashMgr** ptr, int * md,
     const char * key = NULL);
+#endif
   ~AffixMgr();
   struct hentry *     affix_check(const char * word, int len,
             const unsigned short needflag = (unsigned short) 0,
@@ -217,6 +260,10 @@ public:
   int                 get_fullstrip() const;
 
 private:
+#ifdef HUNSPELL_CHROME_CLIENT
+  // Not owned by us, owned by the Hunspell object.
+  hunspell::BDictReader* bdict_reader;
+#endif
   int  parse_file(const char * affpath, const char * key);
   int  parse_flag(char * line, unsigned short * out, FileMgr * af);
   int  parse_num(char * line, int * out, FileMgr * af);
@@ -244,7 +291,7 @@ private:
   int process_sfx_tree_to_list();
   int redundant_condition(char, char * strip, int stripl,
       const char * cond, int);
+  void finishFileMgr(FileMgr *afflst);
 };
 
 #endif
-

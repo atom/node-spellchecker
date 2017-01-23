@@ -12,8 +12,14 @@
 
 // build a hash table from a munched word list
 
+#ifdef HUNSPELL_CHROME_CLIENT
+HashMgr::HashMgr(hunspell::BDictReader* reader)
+{
+  bdict_reader = reader;
+#else
 HashMgr::HashMgr(const char * tpath, const char * apath, const char * key)
 {
+#endif
   tablesize = 0;
   tableptr = NULL;
   flag_mode = FLAG_CHAR;
@@ -31,8 +37,14 @@ HashMgr::HashMgr(const char * tpath, const char * apath, const char * key)
   numaliasm = 0;
   aliasm = NULL;
   forbiddenword = FORBIDDENWORD; // forbidden word signing flag
+#ifdef HUNSPELL_CHROME_CLIENT
+  // No tables to load, just the AF lines.
+  load_config(NULL, NULL);
+  int ec = LoadAFLines();
+#else
   load_config(apath, key);
   int ec = load_tables(tpath, key);
+#endif
   if (ec) {
     /* error condition - what should we do here */
     HUNSPELL_WARNING(stderr, "Hash Manager Error : %d\n",ec);
@@ -91,15 +103,58 @@ HashMgr::~HashMgr()
   if (ignorechars) free(ignorechars);
   if (ignorechars_utf16) free(ignorechars_utf16);
 
+#ifdef HUNSPELL_CHROME_CLIENT
+  EmptyHentryCache();
+  for (std::vector<std::string*>::iterator it = pointer_to_strings_.begin();
+       it != pointer_to_strings_.end(); ++it) {
+    delete *it;
+  }
+#endif
 #ifdef MOZILLA_CLIENT
     delete [] csconv;
 #endif
 }
 
+#ifdef HUNSPELL_CHROME_CLIENT
+void HashMgr::EmptyHentryCache() {
+  // We need to delete each cache entry, and each additional one in the linked
+  // list of homonyms.
+  for (HEntryCache::iterator i = hentry_cache.begin();
+       i != hentry_cache.end(); ++i) {
+    hentry* cur = i->second;
+    while (cur) {
+      hentry* next = cur->next_homonym;
+      DeleteHashEntry(cur);
+      cur = next;
+    }
+  }
+  hentry_cache.clear();
+}
+#endif
+
 // lookup a root word in the hashtable
 
 struct hentry * HashMgr::lookup(const char *word) const
 {
+#ifdef HUNSPELL_CHROME_CLIENT
+  int affix_ids[hunspell::BDict::MAX_AFFIXES_PER_WORD];
+  int affix_count = bdict_reader->FindWord(word, affix_ids);
+  if (affix_count == 0) { // look for custom added word
+    std::map<base::StringPiece, int>::const_iterator iter = 
+      custom_word_to_affix_id_map_.find(word);
+    if (iter != custom_word_to_affix_id_map_.end()) {
+      affix_count = 1;
+      affix_ids[0] = iter->second;
+    }
+  }
+
+  static const int kMaxWordLen = 128;
+  static char word_buf[kMaxWordLen];
+  // To take account of null-termination, we use upto 127.
+  strncpy(word_buf, word, kMaxWordLen - 1);
+
+  return AffixIDsToHentry(word_buf, affix_ids, affix_count);
+#else
     struct hentry * dp;
     if (tableptr) {
        dp = tableptr[hash(word)];
@@ -109,12 +164,14 @@ struct hentry * HashMgr::lookup(const char *word) const
        }
     }
     return NULL;
+#endif
 }
 
 // add a word to the hash table (private)
 int HashMgr::add_word(const char * word, int wbl, int wcl, unsigned short * aff,
     int al, const char * desc, bool onlyupcase)
 {
+#ifndef HUNSPELL_CHROME_CLIENT
     bool upcasehomonym = false;
     int descl = desc ? (aliasm ? sizeof(short) : strlen(desc) + 1) : 0;
     // variable-length hash record with word and optional fields
@@ -206,6 +263,17 @@ int HashMgr::add_word(const char * word, int wbl, int wcl, unsigned short * aff,
     	    if (hp->astr) free(hp->astr);
     	    free(hp);
        }
+#else
+    std::map<base::StringPiece, int>::iterator iter =
+        custom_word_to_affix_id_map_.find(word);
+    if(iter == custom_word_to_affix_id_map_.end()) {  // word needs to be added
+      std::string* new_string_word = new std::string(word);
+      pointer_to_strings_.push_back(new_string_word);
+      base::StringPiece sp(*(new_string_word));
+      custom_word_to_affix_id_map_[sp] = 0; // no affixes for custom words
+      return 1;
+    }
+#endif
     return 0;
 }     
 
@@ -256,6 +324,12 @@ int HashMgr::get_clen_and_captype(const char * word, int wbl, int * captype) {
 // remove word (personal dictionary function for standalone applications)
 int HashMgr::remove(const char * word)
 {
+#ifdef HUNSPELL_CHROME_CLIENT
+    std::map<base::StringPiece, int>::iterator iter =
+        custom_word_to_affix_id_map_.find(word);
+    if (iter != custom_word_to_affix_id_map_.end())
+        custom_word_to_affix_id_map_.erase(iter);
+#else
     struct hentry * dp = lookup(word);
     while (dp) {
         if (dp->alen == 0 || !TESTAFF(dp->astr, forbiddenword, dp->alen)) {
@@ -270,6 +344,7 @@ int HashMgr::remove(const char * word)
         }
         dp = dp->next_homonym;
     }
+#endif
     return 0;
 }
 
@@ -339,6 +414,44 @@ int HashMgr::add_with_affix(const char * word, const char * example)
 // initialize: col=-1; hp = NULL; hp = walk_hashtable(&col, hp);
 struct hentry * HashMgr::walk_hashtable(int &col, struct hentry * hp) const
 {  
+#ifdef HUNSPELL_CHROME_CLIENT
+  // Return NULL if dictionary is not valid.
+  if (!bdict_reader->IsValid())
+    return NULL;
+
+  // This function is only ever called by one place and not nested. We can
+  // therefore keep static state between calls and use |col| as a "reset" flag
+  // to avoid changing the API. It is set to -1 for the first call.
+  // Allocate the iterator on the heap to prevent an exit time destructor.
+  static hunspell::WordIterator& word_iterator =
+      *new hunspell::WordIterator(bdict_reader->GetAllWordIterator());
+  if (col < 0) {
+    col = 1;
+    word_iterator = bdict_reader->GetAllWordIterator();
+  }
+
+  int affix_ids[hunspell::BDict::MAX_AFFIXES_PER_WORD];
+  static const int kMaxWordLen = 128;
+  static char word[kMaxWordLen];
+  int affix_count = word_iterator.Advance(word, kMaxWordLen, affix_ids);
+  if (affix_count == 0)
+    return NULL;
+  short word_len = static_cast<short>(strlen(word));
+
+  // Since hunspell 1.2.8, an hentry struct becomes a variable-length struct,
+  // i.e. a struct which uses its array 'word[1]' as a variable-length array.
+  // As noted above, this function is not nested. So, we just use a static
+  // struct which consists of an hentry and a char[kMaxWordLen], and initialize
+  // the static struct and return it for now.
+  // No need to create linked lists for the extra affixes.
+  static struct {
+    hentry entry;
+    char word[kMaxWordLen];
+  } hash_entry;
+
+  return InitHashEntry(&hash_entry.entry, sizeof(hash_entry),
+                       &word[0], word_len, affix_ids[0]);
+#else
   if (hp && hp->next != NULL) return hp->next;
   for (col++; col < tablesize; col++) {
     if (tableptr[col]) return tableptr[col];
@@ -346,11 +459,13 @@ struct hentry * HashMgr::walk_hashtable(int &col, struct hentry * hp) const
   // null at end and reset to start
   col = -1;
   return NULL;
+#endif
 }
 
 // load a munched word list and build a hash table on the fly
 int HashMgr::load_tables(const char * tpath, const char * key)
 {
+#ifndef HUNSPELL_CHROME_CLIENT
   int al;
   char * ap;
   char * dp;
@@ -363,8 +478,8 @@ int HashMgr::load_tables(const char * tpath, const char * key)
   if (dict == NULL) return 1;
 
   // first read the first line of file to get hash table size */
-  if (!(ts = dict->getline())) {
-    HUNSPELL_WARNING(stderr, "error: empty dic file\n");
+  if ((ts = dict->getline()) == NULL) {
+    HUNSPELL_WARNING(stderr, "error: empty dic file %s\n", tpath);
     delete dict;
     return 2;
   }
@@ -396,11 +511,11 @@ int HashMgr::load_tables(const char * tpath, const char * key)
   // loop through all words on much list and add to hash
   // table and create word and affix strings
 
-  while ((ts = dict->getline())) {
+  while ((ts = dict->getline()) != NULL) {
     mychomp(ts);
     // split each line into word and morphological description
     dp = ts;
-    while ((dp = strchr(dp, ':'))) {
+    while ((dp = strchr(dp, ':')) != NULL) {
 	if ((dp > ts + 3) && (*(dp - 3) == ' ' || *(dp - 3) == '\t')) {
 	    for (dp -= 4; dp >= ts && (*dp == ' ' || *dp == '\t'); dp--);
 	    if (dp < ts) { // missing word
@@ -471,6 +586,7 @@ int HashMgr::load_tables(const char * tpath, const char * key)
   }
 
   delete dict;
+#endif
   return 0;
 }
 
@@ -479,6 +595,9 @@ int HashMgr::load_tables(const char * tpath, const char * key)
 
 int HashMgr::hash(const char * word) const
 {
+#ifdef HUNSPELL_CHROME_CLIENT
+    return 0;
+#else
     long  hv = 0;
     for (int i=0; i < 4  &&  *word != 0; i++)
         hv = (hv << 8) | (*word++);
@@ -487,6 +606,7 @@ int HashMgr::hash(const char * word) const
       hv ^= (*word++);
     }
     return (unsigned long) hv % tablesize;
+#endif
 }
 
 int HashMgr::decode_flags(unsigned short ** result, char * flags, FileMgr * af) {
@@ -607,7 +727,12 @@ int  HashMgr::load_config(const char * affpath, const char * key)
   int firstline = 1;
  
   // open the affix file
+#ifdef HUNSPELL_CHROME_CLIENT
+  hunspell::LineIterator iterator = bdict_reader->GetOtherLineIterator();
+  FileMgr * afflst = new FileMgr(&iterator);
+#else
   FileMgr * afflst = new FileMgr(affpath, key);
+#endif
   if (!afflst) {
     HUNSPELL_WARNING(stderr, "Error - could not open affix description file %s\n",affpath);
     return 1;
@@ -616,7 +741,7 @@ int  HashMgr::load_config(const char * affpath, const char * key)
     // read in each line ignoring any that do not
     // start with a known line type indicator
 
-    while ((line = afflst->getline())) {
+    while ((line = afflst->getline()) != NULL) {
         mychomp(line);
 
        /* remove byte order mark */
@@ -756,7 +881,7 @@ int  HashMgr::parse_aliasf(char * line, FileMgr * af)
    /* now parse the numaliasf lines to read in the remainder of the table */
    char * nl;
    for (int j=0; j < numaliasf; j++) {
-        if (!(nl = af->getline())) return 1;
+        if ((nl = af->getline()) == NULL) return 1;
         mychomp(nl);
         tp = nl;
         i = 0;
@@ -801,6 +926,121 @@ int  HashMgr::parse_aliasf(char * line, FileMgr * af)
    }
    return 0;
 }
+
+#ifdef HUNSPELL_CHROME_CLIENT
+int HashMgr::LoadAFLines()
+{
+  utf8 = 1;  // We always use UTF-8.
+
+  // Read in all the AF lines which tell us the rules for each affix group ID.
+  hunspell::LineIterator iterator = bdict_reader->GetAfLineIterator();
+  FileMgr afflst(&iterator);
+  while (char* line = afflst.getline()) {
+    int rv = parse_aliasf(line, &afflst);
+    if (rv)
+      return rv;
+  }
+
+  return 0;
+}
+
+hentry* HashMgr::InitHashEntry(hentry* entry,
+                               size_t item_size,
+                               const char* word,
+                               int word_length,
+                               int affix_index) const {
+  // Return if the given buffer doesn't have enough space for a hentry struct
+  // or the given word is too long.
+  // Our BDICT cannot handle words longer than (128 - 1) bytes. So, it is
+  // better to return an error if the given word is too long and prevent
+  // an unexpected result caused by a long word.
+  const int kMaxWordLen = 128;
+  if (item_size < sizeof(hentry) + word_length + 1 ||
+      word_length >= kMaxWordLen)
+    return NULL;
+
+  // Initialize a hentry struct with the given parameters, and
+  // append the given string at the end of this hentry struct.
+  memset(entry, 0, item_size);
+  FileMgr af(NULL);
+  entry->alen = static_cast<short>(
+      const_cast<HashMgr*>(this)->get_aliasf(affix_index, &entry->astr, &af));
+  entry->blen = static_cast<unsigned char>(word_length);
+  memcpy(&entry->word, word, word_length);
+
+  return entry;
+}
+
+hentry* HashMgr::CreateHashEntry(const char* word,
+                                 int word_length,
+                                 int affix_index) const {
+  // Return if the given word is too long.
+  // (See the comment in HashMgr::InitHashEntry().)
+  const int kMaxWordLen = 128;
+  if (word_length >= kMaxWordLen)
+    return NULL;
+
+  const size_t kEntrySize = sizeof(hentry) + word_length + 1;
+  struct hentry* entry = reinterpret_cast<hentry*>(malloc(kEntrySize));
+  if (entry)
+    InitHashEntry(entry, kEntrySize, word, word_length, affix_index);
+
+  return entry;
+}
+
+void HashMgr::DeleteHashEntry(hentry* entry) const {
+  free(entry);
+}
+
+hentry* HashMgr::AffixIDsToHentry(char* word,
+                                  int* affix_ids, 
+                                  int affix_count) const
+{
+  if (affix_count == 0)
+    return NULL;
+
+  HEntryCache& cache = const_cast<HashMgr*>(this)->hentry_cache;
+  std::string std_word(word);
+  HEntryCache::iterator found = cache.find(std_word);
+  if (found != cache.end()) {
+    // We must return an existing hentry for the same word if we've previously
+    // handed one out. Hunspell will compare pointers in some cases to see if
+    // two words it has found are the same.
+    return found->second;
+  }
+
+  short word_len = static_cast<short>(strlen(word));
+
+  // We can get a number of prefixes per word. There will normally be only one,
+  // but if not, there will be a linked list of "hentry"s for the "homonym"s 
+  // for the word.
+  struct hentry* first_he = NULL;
+  struct hentry* prev_he = NULL;  // For making linked list.
+  for (int i = 0; i < affix_count; i++) {
+    struct hentry* he = CreateHashEntry(word, word_len, affix_ids[i]);
+    if (!he)
+      break;
+    if (i == 0)
+      first_he = he;
+    if (prev_he)
+      prev_he->next_homonym = he;
+    prev_he = he;
+  }
+
+  cache[std_word] = first_he;  // Save this word in the cache for later.
+  return first_he;
+}
+
+hentry* HashMgr::GetHentryFromHEntryCache(char* word) {
+  HEntryCache& cache = const_cast<HashMgr*>(this)->hentry_cache;
+  std::string std_word(word);
+  HEntryCache::iterator found = cache.find(std_word);
+  if (found != cache.end())
+    return found->second;
+  else
+    return NULL;
+}
+#endif
 
 int HashMgr::is_aliasf() {
     return (aliasf != NULL);
@@ -863,7 +1103,7 @@ int  HashMgr::parse_aliasm(char * line, FileMgr * af)
    /* now parse the numaliasm lines to read in the remainder of the table */
    char * nl = line;
    for (int j=0; j < numaliasm; j++) {
-        if (!(nl = af->getline())) return 1;
+        if ((nl = af->getline()) == NULL) return 1;
         mychomp(nl);
         tp = nl;
         i = 0;
