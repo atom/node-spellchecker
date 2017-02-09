@@ -7,6 +7,8 @@
 
 #ifdef WIN32
 
+#include <windows.h>
+
 #define SEARCH_PATHS "C:\\Hunspell\\"
 #define DIR_SEPARATOR "\\"
 #define PATH_SEPARATOR ";"
@@ -182,7 +184,29 @@ std::vector<std::string> HunspellSpellchecker::SearchAvailableDictionaries(const
     search_path.append(DIR_SEPARATOR);
 
 #ifdef WIN32
-    // TODO: Windows compatibility?
+    search_path.append("*");
+
+    WIN32_FIND_DATA search_data;
+    memset(&search_data, 0, sizeof(WIN32_FIND_DATA));
+
+    HANDLE handle = FindFirstFile(search_path.c_str(), &search_data);
+
+    while (handle != INVALID_HANDLE_VALUE) {
+      std::string filename(search_data.cFileName);
+
+      if (filename.size() > 4 && filename.compare(filename.size() - 4, 4, ".dic") == 0) {
+        my_list.push_back(filename.substr(0, filename.size() - 4));
+      }
+      else if (filename.size() > 7 && filename.compare(filename.size() - 7, 7, ".dic.hz") == 0) {
+        my_list.push_back(filename.substr(0, filename.size() - 7));
+      }
+
+      if (FindNextFile(handle, &search_data) == FALSE) {
+        break;
+      }
+    }
+
+    FindClose(handle);
 #else
     DIR* dir = opendir(search_path.c_str());
 
