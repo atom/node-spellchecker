@@ -164,7 +164,7 @@ describe "SpellChecker", ->
       expect(dictionaries.length).toBeGreaterThan 0
       for dictionary in dictionaries.length
         expect(typeof dictionary).toBe 'string'
-        expect(diction.length).toBeGreaterThan 0
+        expect(dictionary.length).toBeGreaterThan 0
 
   describe ".setDictionary(lang, dictDirectory)", ->
     it "sets the spell checker's language, and dictionary directory", ->
