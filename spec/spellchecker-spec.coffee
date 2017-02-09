@@ -161,13 +161,21 @@ describe "SpellChecker", ->
       dictionaries = @fixture.getAvailableDictionaries dictionaryDirectory
       expect(Array.isArray(dictionaries)).toBe true
 
+      expect(dictionaries.length).toBeGreaterThan 0
+      for dictionary in dictionaries.length
+        expect(typeof dictionary).toBe 'string'
+        expect(dictionary.length).toBeGreaterThan 0
+
+    it "returns the right dictionary names when using hunspell on linux", ->
+      return if process.platform is not 'linux'
+
+      dictionaries = @fixture.getAvailableDictionaries dictionaryDirectory
+      expect(Array.isArray(dictionaries)).toBe true
+
       expect(dictionaries.length).toBeGreaterThan 3
       expect(dictionaries).toContain('en_US');
       expect(dictionaries).toContain('de_DE_frami');
       expect(dictionaries).toContain('fr');
-      for dictionary in dictionaries.length
-        expect(typeof dictionary).toBe 'string'
-        expect(dictionary.length).toBeGreaterThan 0
 
   describe ".setDictionary(lang, dictDirectory)", ->
     it "sets the spell checker's language, and dictionary directory", ->
