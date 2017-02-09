@@ -158,10 +158,13 @@ describe "SpellChecker", ->
       @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of string dictionary names", ->
-      dictionaries = @fixture.getAvailableDictionaries()
+      dictionaries = @fixture.getAvailableDictionaries dictionaryDirectory
       expect(Array.isArray(dictionaries)).toBe true
 
-      expect(dictionaries.length).toBeGreaterThan 0
+      expect(dictionaries.length).toBeGreaterThan 3
+      expect(dictionaries).toContain('en_US');
+      expect(dictionaries).toContain('de_DE_frami');
+      expect(dictionaries).toContain('fr');
       for dictionary in dictionaries.length
         expect(typeof dictionary).toBe 'string'
         expect(dictionary.length).toBeGreaterThan 0
