@@ -167,7 +167,7 @@ describe "SpellChecker", ->
         expect(dictionary.length).toBeGreaterThan 0
 
     it "returns the right dictionary names when using hunspell on linux", ->
-      return if process.platform is not 'linux'
+      return if not (process.platform is 'linux')
 
       dictionaries = @fixture.getAvailableDictionaries dictionaryDirectory
       expect(Array.isArray(dictionaries)).toBe true
