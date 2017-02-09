@@ -158,6 +158,9 @@ describe "SpellChecker", ->
       @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of string dictionary names", ->
+      # NB: getAvailableDictionaries is nop'ped in hunspell on windows
+      return if process.platform is 'win32' and process.env.SPELLCHECKER_PREFER_HUNSPELL
+
       dictionaries = @fixture.getAvailableDictionaries dictionaryDirectory
       expect(Array.isArray(dictionaries)).toBe true
 
