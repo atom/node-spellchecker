@@ -1,8 +1,31 @@
 #include <cstdio>
 #include <cwctype>
 #include <algorithm>
+#include <fstream>
 #include "../vendor/hunspell/src/hunspell/hunspell.hxx"
 #include "spellchecker_hunspell.h"
+
+#ifdef WIN32
+
+#define SEARCH_PATHS "C:\\Hunspell\\"
+#define DIR_SEPARATOR "\\"
+#define PATH_SEPARATOR ";"
+
+#else
+
+// Not windows
+#include <sys/types.h>
+#include <dirent.h>
+
+#define SEARCH_PATHS \
+  "/usr/share/hunspell:" \
+  "/usr/share/myspell:" \
+  "/usr/share/myspell/dicts:" \
+  "/Library/Spelling"
+#define DIR_SEPARATOR "/"
+#define PATH_SEPARATOR ":"
+
+#endif
 
 namespace spellchecker {
 
@@ -29,8 +52,13 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language, const std:
   std::string lang = language;
   std::replace(lang.begin(), lang.end(), '-', '_');
 
-  std::string affixpath = dirname + "/" + lang + ".aff";
-  std::string dpath = dirname + "/" + lang + ".dic";
+  std::string search_path;
+  search_path.append(dirname);
+  search_path.append(PATH_SEPARATOR);
+  search_path.append(SEARCH_PATHS);
+
+  std::string affixpath = FindDictionary(search_path, lang, ".aff");
+  std::string dpath = FindDictionary(search_path, lang, ".dic");
 
   // TODO: This code is almost certainly jacked on Win32 for non-ASCII paths
   FILE* handle = fopen(dpath.c_str(), "r");
@@ -44,7 +72,12 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language, const std:
 }
 
 std::vector<std::string> HunspellSpellchecker::GetAvailableDictionaries(const std::string& path) {
-  return std::vector<std::string>();
+  std::string search_path;
+  search_path.assign(path);
+  search_path.append(PATH_SEPARATOR);
+  search_path.append(SEARCH_PATHS);
+
+  return SearchAvailableDictionaries(search_path);
 }
 
 bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
@@ -139,6 +172,91 @@ std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(cons
     hunspell->free_list(&slist, size);
   }
   return corrections;
+}
+
+std::vector<std::string> HunspellSpellchecker::SearchAvailableDictionaries(const std::string& path) {
+  const char * c_path = path.c_str();
+  char * begin = const_cast<char *>(c_path); // TODO: Do we need this?
+  char * end = begin;
+
+  std::vector<std::string> my_list;
+
+  while (1) {
+    while ( ! ((*end == *PATH_SEPARATOR) || (*end == '\0'))) {
+      end++;
+    }
+
+    std::string search_path;
+    search_path.assign(begin, end - begin);
+    search_path.append(DIR_SEPARATOR);
+
+#ifdef WIN32
+    // TODO: Windows compatibility?
+#else
+    DIR* dir = opendir(search_path.c_str());
+
+    if (dir) {
+      struct dirent* de;
+      while ((de = readdir(dir))) {
+        std::string filename(de->d_name);
+
+        if (filename.size() > 4 && filename.compare(filename.size() - 4, 4, ".dic") == 0) {
+          my_list.push_back(filename.substr(0, filename.size() - 4));
+        }
+        else if (filename.size() > 7 && filename.compare(filename.size() - 7, 7, ".dic.hz") == 0) {
+          my_list.push_back(filename.substr(0, filename.size() - 7));
+        }
+      }
+
+      closedir(dir);
+    }
+#endif
+
+    if (*end == '\0') {
+      return my_list;
+    }
+
+    end++;
+    begin = end;
+  }
+}
+
+std::string HunspellSpellchecker::FindDictionary(const std::string& path, const std::string& language, const std::string& extension) {
+  const char * c_path = path.c_str();
+  char * begin = const_cast<char *>(c_path); // TODO: Do we need this?
+  char * end = begin;
+
+  while (1) {
+    while ( ! ((*end == *PATH_SEPARATOR) || (*end == '\0'))) {
+      end++;
+    }
+
+    std::string file_path;
+    file_path.assign(begin, end - begin);
+    file_path.append(DIR_SEPARATOR);
+    file_path.append(language);
+    file_path.append(extension);
+
+    std::ifstream f;
+    f.open(file_path, std::ios_base::in);
+    if (f.is_open()) {
+      return file_path;
+    }
+
+    file_path.append(".hz");
+
+    f.open(file_path, std::ios_base::in);
+    if (f.is_open()) {
+      return file_path;
+    }
+
+    if (*end == '\0') {
+      return NULL;
+    }
+
+    end++;
+    begin = end;
+  }
 }
 
 }  // namespace spellchecker
