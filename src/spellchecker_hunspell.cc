@@ -52,10 +52,7 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language, const std:
   std::string lang = language;
   std::replace(lang.begin(), lang.end(), '-', '_');
 
-  std::string search_path;
-  search_path.append(dirname);
-  search_path.append(PATH_SEPARATOR);
-  search_path.append(SEARCH_PATHS);
+  std::string search_path = dirname + PATH_SEPARATOR + SEARCH_PATHS;
 
   std::string affixpath = FindDictionary(search_path, lang, ".aff");
   std::string dpath = FindDictionary(search_path, lang, ".dic");
@@ -72,10 +69,7 @@ bool HunspellSpellchecker::SetDictionary(const std::string& language, const std:
 }
 
 std::vector<std::string> HunspellSpellchecker::GetAvailableDictionaries(const std::string& path) {
-  std::string search_path;
-  search_path.assign(path);
-  search_path.append(PATH_SEPARATOR);
-  search_path.append(SEARCH_PATHS);
+  std::string search_path = path + PATH_SEPARATOR + SEARCH_PATHS;
 
   return SearchAvailableDictionaries(search_path);
 }
