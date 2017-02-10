@@ -107,7 +107,7 @@ describe "SpellChecker", ->
   describe ".getCorrectionsForMisspelling(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage, dictionaryDirectory
+      @fixture.setDictionary 'en_US', dictionaryDirectory
 
     it "returns an array of possible corrections", ->
       corrections = @fixture.getCorrectionsForMisspelling('worrd')
