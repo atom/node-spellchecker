@@ -2,6 +2,7 @@
 #include <cwctype>
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include "../vendor/hunspell/src/hunspell/hunspell.hxx"
 #include "spellchecker_hunspell.h"
 
@@ -11,7 +12,7 @@
 
 #define SEARCH_PATHS "C:\\Hunspell\\"
 #define DIR_SEPARATOR "\\"
-#define PATH_SEPARATOR ";"
+#define PATH_SEPARATOR ';'
 
 #else
 
@@ -25,7 +26,7 @@
   "/usr/share/myspell/dicts:" \
   "/Library/Spelling"
 #define DIR_SEPARATOR "/"
-#define PATH_SEPARATOR ":"
+#define PATH_SEPARATOR ':'
 
 #endif
 
@@ -168,19 +169,10 @@ std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(cons
 }
 
 std::vector<std::string> HunspellSpellchecker::SearchAvailableDictionaries(const std::string& path) {
-  const char * c_path = path.c_str();
-  char * begin = const_cast<char *>(c_path); // TODO: Do we need this?
-  char * end = begin;
-
   std::vector<std::string> my_list;
+  std::istringstream path_stream(path);
 
-  while (1) {
-    while ( ! ((*end == *PATH_SEPARATOR) || (*end == '\0'))) {
-      end++;
-    }
-
-    std::string search_path;
-    search_path.assign(begin, end - begin);
+  for (std::string search_path; std::getline(path_stream, search_path, PATH_SEPARATOR); ) {
     search_path.append(DIR_SEPARATOR);
 
 #ifdef WIN32
@@ -226,28 +218,15 @@ std::vector<std::string> HunspellSpellchecker::SearchAvailableDictionaries(const
       closedir(dir);
     }
 #endif
-
-    if (*end == '\0') {
-      return my_list;
-    }
-
-    end++;
-    begin = end;
   }
+
+  return my_list;
 }
 
 std::string HunspellSpellchecker::FindDictionary(const std::string& path, const std::string& language, const std::string& extension) {
-  const char * c_path = path.c_str();
-  char * begin = const_cast<char *>(c_path); // TODO: Do we need this?
-  char * end = begin;
+  std::istringstream path_stream(path);
 
-  while (1) {
-    while ( ! ((*end == *PATH_SEPARATOR) || (*end == '\0'))) {
-      end++;
-    }
-
-    std::string file_path;
-    file_path.assign(begin, end - begin);
+  for (std::string file_path; std::getline(path_stream, file_path, PATH_SEPARATOR); ) {
     file_path.append(DIR_SEPARATOR);
     file_path.append(language);
     file_path.append(extension);
@@ -264,14 +243,9 @@ std::string HunspellSpellchecker::FindDictionary(const std::string& path, const 
     if (f.is_open()) {
       return file_path;
     }
-
-    if (*end == '\0') {
-      return "";
-    }
-
-    end++;
-    begin = end;
   }
+
+  return "";
 }
 
 }  // namespace spellchecker
