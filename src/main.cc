@@ -1,6 +1,7 @@
 #include <vector>
 #include "nan.h"
 #include "spellchecker.h"
+#include "worker.h"
 
 using Nan::ObjectWrap;
 using namespace spellchecker;
@@ -86,6 +87,28 @@ class Spellchecker : public Nan::ObjectWrap {
     }
   }
 
+  static NAN_METHOD(CheckSpellingCallback) {
+    Nan::HandleScope scope;
+    if (info.Length() < 2) {
+      return Nan::ThrowError("Bad argument");
+    }
+
+    Handle<String> string = Handle<String>::Cast(info[0]);
+    if (!string->IsString()) {
+      return Nan::ThrowError("Bad argument");
+    }
+
+    Nan::Callback *callback = new Nan::Callback(info[1].As<v8::Function>());
+
+    std::vector<uint16_t> *corpus = new std::vector<uint16_t>(string->Length() + 1);
+    string->Write(reinterpret_cast<uint16_t *>(corpus->data()));
+
+    Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
+
+    CheckSpellingWorker* worker = new CheckSpellingWorker(corpus, that->impl, callback);
+    Nan::AsyncQueueWorker(worker);
+  }
+
   static NAN_METHOD(Add) {
     Nan::HandleScope scope;
     if (info.Length() < 1) {
@@ -98,7 +121,7 @@ class Spellchecker : public Nan::ObjectWrap {
     that->impl->Add(word);
     return;
   }
-  
+
   static NAN_METHOD(Remove) {
     Nan::HandleScope scope;
     if (info.Length() < 1) {
@@ -179,6 +202,7 @@ class Spellchecker : public Nan::ObjectWrap {
     Nan::SetMethod(tpl->InstanceTemplate(), "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);
     Nan::SetMethod(tpl->InstanceTemplate(), "isMisspelled", Spellchecker::IsMisspelled);
     Nan::SetMethod(tpl->InstanceTemplate(), "checkSpelling", Spellchecker::CheckSpelling);
+    Nan::SetMethod(tpl->InstanceTemplate(), "checkSpellingCallback", Spellchecker::CheckSpellingCallback);
     Nan::SetMethod(tpl->InstanceTemplate(), "add", Spellchecker::Add);
     Nan::SetMethod(tpl->InstanceTemplate(), "remove", Spellchecker::Remove);
 
