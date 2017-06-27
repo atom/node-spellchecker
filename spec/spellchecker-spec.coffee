@@ -123,6 +123,11 @@ describe "SpellChecker", ->
           {start: 13, end: 18}
         ]
 
+    it "handles invalid inputs", ->
+      expect(=> @fixture.checkSpelling()).toThrow("Bad argument")
+      expect(=> @fixture.checkSpelling(null)).toThrow("Bad argument")
+      expect(=> @fixture.checkSpelling(47)).toThrow("Bad argument")
+
   describe ".getCorrectionsForMisspelling(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
