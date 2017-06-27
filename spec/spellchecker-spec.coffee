@@ -115,7 +115,7 @@ describe "SpellChecker", ->
 
       @fixture.checkSpellingAsync(string).then (r) -> ranges = r
 
-      waitsFor -> ranges is not null
+      waitsFor -> ranges isnt null
 
       runs ->
         expect(ranges).toEqual [
