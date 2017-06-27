@@ -29,6 +29,7 @@
       'include_dirs': [ '<!(node -e "require(\'nan\')")' ],
       'sources': [
         'src/main.cc',
+        'src/worker.cc'
       ],
       'conditions': [
         ['spellchecker_use_hunspell=="true"', {
