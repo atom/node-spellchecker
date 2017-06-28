@@ -5,12 +5,13 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 
 CheckSpellingWorker::CheckSpellingWorker(
-  const std::vector<uint16_t>* corpus,
+  const std::vector<uint16_t>&& corpus,
   SpellcheckerImplementation* impl,
   Nan::Callback* callback
-) : AsyncWorker(callback), corpus(corpus), impl(impl)
+) : AsyncWorker(callback), corpus(std::move(corpus)), impl(impl)
 {
   // No-op
 }
@@ -21,7 +22,7 @@ CheckSpellingWorker::~CheckSpellingWorker()
 }
 
 void CheckSpellingWorker::Execute() {
-  misspelled_ranges = impl->CheckSpelling(corpus->data(), corpus->size());
+  misspelled_ranges = impl->CheckSpelling(corpus.data(), corpus.size());
 }
 
 void CheckSpellingWorker::HandleOKCallback() {

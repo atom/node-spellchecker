@@ -1,4 +1,5 @@
 #include <vector>
+#include <utility>
 #include "nan.h"
 #include "spellchecker.h"
 #include "worker.h"
@@ -100,12 +101,12 @@ class Spellchecker : public Nan::ObjectWrap {
 
     Nan::Callback *callback = new Nan::Callback(info[1].As<Function>());
 
-    std::vector<uint16_t> *corpus = new std::vector<uint16_t>(string->Length() + 1);
-    string->Write(reinterpret_cast<uint16_t *>(corpus->data()));
+    std::vector<uint16_t> corpus(string->Length() + 1);
+    string->Write(reinterpret_cast<uint16_t *>(corpus.data()));
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
 
-    CheckSpellingWorker* worker = new CheckSpellingWorker(corpus, that->impl, callback);
+    CheckSpellingWorker* worker = new CheckSpellingWorker(std::move(corpus), that->impl, callback);
     Nan::AsyncQueueWorker(worker);
   }
 
