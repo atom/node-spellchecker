@@ -59,7 +59,7 @@ WindowsSpellchecker::WindowsSpellchecker() {
   this->currentSpellchecker = NULL;
 
   if (InterlockedIncrement(&g_COMRefcount) == 1) {
-    g_COMFailed = FAILED(CoInitialize(NULL));
+    g_COMFailed = FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED));
     if (g_COMFailed) return;
   }
 
