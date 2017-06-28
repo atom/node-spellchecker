@@ -30,6 +30,22 @@ Get the corrections for a misspelled word.
 
 Returns a non-null but possibly empty array of string corrections.
 
+### SpellChecker.checkSpelling(corpus)
+
+Identify misspelled words in a corpus of text.
+
+`corpus` - String corpus of text to spellcheck.
+
+Returns an Array containing `{start, end}` objects that describe an index range within the original String that contains a misspelled word.
+
+### SpellChecker.checkSpellingAsync(corpus)
+
+Asynchronously identify misspelled words.
+
+`corpus` - String corpus of text to spellcheck.
+
+Returns a Promise that resolves with the Array described by `checkSpelling()`.
+
 ### SpellChecker.add(word)
 
 Adds a word to the dictionary.

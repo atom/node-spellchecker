@@ -104,15 +104,41 @@ describe "SpellChecker", ->
       expect(-> fixture.checkSpelling(null)).toThrow("Bad argument")
       expect(-> fixture.checkSpelling({})).toThrow("Bad argument")
 
+  describe ".checkSpellingAsync(string)", ->
+    beforeEach ->
+      @fixture = new Spellchecker()
+      @fixture.setDictionary defaultLanguage, dictionaryDirectory
+
+    it "returns an array of character ranges of misspelled words", ->
+      string = "cat caat dog dooog"
+      ranges = null
+
+      @fixture.checkSpellingAsync(string).then (r) -> ranges = r
+
+      waitsFor -> ranges isnt null
+
+      runs ->
+        expect(ranges).toEqual [
+          {start: 4, end: 8}
+          {start: 13, end: 18}
+        ]
+
+    it "handles invalid inputs", ->
+      expect(=> @fixture.checkSpelling()).toThrow("Bad argument")
+      expect(=> @fixture.checkSpelling(null)).toThrow("Bad argument")
+      expect(=> @fixture.checkSpelling(47)).toThrow("Bad argument")
+
   describe ".getCorrectionsForMisspelling(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
       @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of possible corrections", ->
+      correction = if process.platform is "darwin" then "world" else "word"
+
       corrections = @fixture.getCorrectionsForMisspelling('worrd')
       expect(corrections.length).toBeGreaterThan 0
-      expect(corrections.indexOf('word')).toBeGreaterThan -1
+      expect(corrections.indexOf(correction)).toBeGreaterThan -1
 
     it "throws an exception when no word specified", ->
       expect(-> @fixture.getCorrectionsForMisspelling()).toThrow()

@@ -24,6 +24,7 @@
     "jasmine-focused": "1.x"
   },
   "dependencies": {
+    "any-promise": "^1.3.0",
     "nan": "^2.0.0"
   }
 }
