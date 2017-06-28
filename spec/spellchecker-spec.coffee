@@ -134,9 +134,11 @@ describe "SpellChecker", ->
       @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of possible corrections", ->
-      corrections = @fixture.getCorrectionsForMisspelling('wordd')
+      correction = if process.platform is "darwin" then "world" else "word"
+
+      corrections = @fixture.getCorrectionsForMisspelling('worrd')
       expect(corrections.length).toBeGreaterThan 0
-      expect(corrections.indexOf('words')).toBeGreaterThan -1
+      expect(corrections.indexOf(correction)).toBeGreaterThan -1
 
     it "throws an exception when no word specified", ->
       expect(-> @fixture.getCorrectionsForMisspelling()).toThrow()
