@@ -87,7 +87,7 @@ class Spellchecker : public Nan::ObjectWrap {
     }
   }
 
-  static NAN_METHOD(CheckSpellingCallback) {
+  static NAN_METHOD(CheckSpellingAsync) {
     Nan::HandleScope scope;
     if (info.Length() < 2) {
       return Nan::ThrowError("Bad argument");
@@ -98,7 +98,7 @@ class Spellchecker : public Nan::ObjectWrap {
       return Nan::ThrowError("Bad argument");
     }
 
-    Nan::Callback *callback = new Nan::Callback(info[1].As<v8::Function>());
+    Nan::Callback *callback = new Nan::Callback(info[1].As<Function>());
 
     std::vector<uint16_t> *corpus = new std::vector<uint16_t>(string->Length() + 1);
     string->Write(reinterpret_cast<uint16_t *>(corpus->data()));
@@ -197,14 +197,14 @@ class Spellchecker : public Nan::ObjectWrap {
     tpl->SetClassName(Nan::New<String>("Spellchecker").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-    Nan::SetMethod(tpl->InstanceTemplate(), "setDictionary", Spellchecker::SetDictionary);
-    Nan::SetMethod(tpl->InstanceTemplate(), "getAvailableDictionaries", Spellchecker::GetAvailableDictionaries);
-    Nan::SetMethod(tpl->InstanceTemplate(), "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);
-    Nan::SetMethod(tpl->InstanceTemplate(), "isMisspelled", Spellchecker::IsMisspelled);
-    Nan::SetMethod(tpl->InstanceTemplate(), "checkSpelling", Spellchecker::CheckSpelling);
-    Nan::SetMethod(tpl->InstanceTemplate(), "checkSpellingCallback", Spellchecker::CheckSpellingCallback);
-    Nan::SetMethod(tpl->InstanceTemplate(), "add", Spellchecker::Add);
-    Nan::SetMethod(tpl->InstanceTemplate(), "remove", Spellchecker::Remove);
+    Nan::SetPrototypeMethod(tpl, "setDictionary", Spellchecker::SetDictionary);
+    Nan::SetPrototypeMethod(tpl, "getAvailableDictionaries", Spellchecker::GetAvailableDictionaries);
+    Nan::SetPrototypeMethod(tpl, "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);
+    Nan::SetPrototypeMethod(tpl, "isMisspelled", Spellchecker::IsMisspelled);
+    Nan::SetPrototypeMethod(tpl, "checkSpelling", Spellchecker::CheckSpelling);
+    Nan::SetPrototypeMethod(tpl, "checkSpellingAsync", Spellchecker::CheckSpellingAsync);
+    Nan::SetPrototypeMethod(tpl, "add", Spellchecker::Add);
+    Nan::SetPrototypeMethod(tpl, "remove", Spellchecker::Remove);
 
     exports->Set(Nan::New("Spellchecker").ToLocalChecked(), tpl->GetFunction());
   }
