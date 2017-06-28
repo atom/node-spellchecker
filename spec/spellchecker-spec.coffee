@@ -134,9 +134,9 @@ describe "SpellChecker", ->
       @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of possible corrections", ->
-      corrections = @fixture.getCorrectionsForMisspelling('worrd')
+      corrections = @fixture.getCorrectionsForMisspelling('wordd')
       expect(corrections.length).toBeGreaterThan 0
-      expect(corrections.indexOf('word')).toBeGreaterThan -1
+      expect(corrections.indexOf('words')).toBeGreaterThan -1
 
     it "throws an exception when no word specified", ->
       expect(-> @fixture.getCorrectionsForMisspelling()).toThrow()
