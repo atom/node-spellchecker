@@ -11,7 +11,7 @@ using namespace v8;
 
 class CheckSpellingWorker : public Nan::AsyncWorker {
 public:
-  CheckSpellingWorker(const std::vector<uint16_t> &&corpus, SpellcheckerImplementation* impl, Nan::Callback* callback);
+  CheckSpellingWorker(std::vector<uint16_t> &&corpus, SpellcheckerImplementation* impl, Nan::Callback* callback);
   ~CheckSpellingWorker();
 
   void Execute();

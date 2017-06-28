@@ -8,7 +8,7 @@
 #include <utility>
 
 CheckSpellingWorker::CheckSpellingWorker(
-  const std::vector<uint16_t>&& corpus,
+  std::vector<uint16_t>&& corpus,
   SpellcheckerImplementation* impl,
   Nan::Callback* callback
 ) : AsyncWorker(callback), corpus(std::move(corpus)), impl(impl)
