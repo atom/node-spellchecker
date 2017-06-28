@@ -29,8 +29,7 @@ void CheckSpellingWorker::HandleOKCallback() {
   Nan::HandleScope scope;
 
   Local<Array> result = Nan::New<Array>();
-  std::vector<MisspelledRange>::const_iterator iter = misspelled_ranges.begin();
-  for (; iter != misspelled_ranges.end(); ++iter) {
+  for (auto iter = misspelled_ranges.begin(); iter != misspelled_ranges.end(); ++iter) {
     size_t index = iter - misspelled_ranges.begin();
     uint32_t start = iter->start, end = iter->end;
 
