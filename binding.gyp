@@ -13,6 +13,7 @@
     ],
   },
   'target_defaults': {
+    'cflags_cc': ['-std=c++11'],
     'conditions': [
       ['OS=="win"', {
         'msvs_disabled_warnings': [
@@ -21,6 +22,12 @@
           4506,  # no definition for inline function
         ],
       }],
+      ['OS=="mac"', {
+        'xcode_settings': {
+           'CLANG_CXX_LIBRARY': 'libc++',
+           'CLANG_CXX_LANGUAGE_STANDARD': 'c++11'
+        }
+      }]
     ],
   },
   'targets': [
