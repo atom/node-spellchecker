@@ -137,9 +137,9 @@ std::vector<std::string> MacSpellchecker::GetCorrectionsForMisspelling(const std
 }
 
 void MacSpellchecker::UpdateGlobalSpellchecker() {
-  const NSString* autoLangauge = @"___AUTO_LANGUAGE";
-  NSString* globalLang = currentGlobalLanguage ? currentGlobalLanguage : autoLangauge;
-  NSString* ourLang = this->spellCheckerLanguage ? this->spellCheckerLanguage : autoLangauge;
+  NSString* autoLanguage = @"___AUTO_LANGUAGE";
+  NSString* globalLang = currentGlobalLanguage ? currentGlobalLanguage : autoLanguage;
+  NSString* ourLang = this->spellCheckerLanguage ? this->spellCheckerLanguage : autoLanguage;
 
   if ([globalLang isEqualToString: ourLang]) {
     return;
