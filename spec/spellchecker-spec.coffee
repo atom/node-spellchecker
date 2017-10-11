@@ -131,7 +131,7 @@ describe "SpellChecker", ->
   describe ".getCorrectionsForMisspelling(word)", ->
     beforeEach ->
       @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage, dictionaryDirectory
+      @fixture.setDictionary 'en_US', dictionaryDirectory
 
     it "returns an array of possible corrections", ->
       correction = if process.platform is "darwin" then "world" else "word"
@@ -184,17 +184,24 @@ describe "SpellChecker", ->
       @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it "returns an array of string dictionary names", ->
-      # NB: getAvailableDictionaries is nop'ped in hunspell and it also doesn't
-      # work inside Appveyor's CI environment
-      return if process.platform is 'linux' or process.env.CI or process.env.SPELLCHECKER_PREFER_HUNSPELL
-
-      dictionaries = @fixture.getAvailableDictionaries()
+      dictionaries = @fixture.getAvailableDictionaries dictionaryDirectory
       expect(Array.isArray(dictionaries)).toBe true
 
       expect(dictionaries.length).toBeGreaterThan 0
       for dictionary in dictionaries.length
         expect(typeof dictionary).toBe 'string'
-        expect(diction.length).toBeGreaterThan 0
+        expect(dictionary.length).toBeGreaterThan 0
+
+    it "returns the right dictionary names when using hunspell on linux", ->
+      return if not (process.platform is 'linux') and not (process.platform is 'win32' and process.env.SPELLCHECKER_PREFER_HUNSPELL)
+
+      dictionaries = @fixture.getAvailableDictionaries dictionaryDirectory
+      expect(Array.isArray(dictionaries)).toBe true
+
+      expect(dictionaries.length).toBeGreaterThan 3
+      expect(dictionaries).toContain('en_US');
+      expect(dictionaries).toContain('de_DE_frami');
+      expect(dictionaries).toContain('fr');
 
   describe ".setDictionary(lang, dictDirectory)", ->
     it "sets the spell checker's language, and dictionary directory", ->

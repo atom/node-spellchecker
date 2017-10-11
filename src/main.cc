@@ -144,7 +144,7 @@ class Spellchecker : public Nan::ObjectWrap {
 
     std::string path = ".";
     if (info.Length() > 0) {
-      std::string path = *String::Utf8Value(info[0]);
+      path = *String::Utf8Value(info[0]);
     }
 
     std::vector<std::string> dictionaries =

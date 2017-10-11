@@ -24,6 +24,9 @@ public:
 private:
   Hunspell* hunspell;
   Transcoder *transcoder;
+
+  std::vector<std::string> SearchAvailableDictionaries(const std::string& path);
+  std::string FindDictionary(const std::string& path, const std::string& language, const std::string& extension);
 };
 
 }  // namespace spellchecker
