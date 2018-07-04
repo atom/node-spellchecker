@@ -8,7 +8,7 @@ environment:
 
 install:
   - ps: Install-Product node $env:nodejs_version
-  - npm --msvs_version=2013 install
+  - npm --msvs_version=2015 install
 
 test_script:
   - node --version
