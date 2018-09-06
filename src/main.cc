@@ -30,10 +30,10 @@ class Spellchecker : public Nan::ObjectWrap {
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
 
-    std::string language = *String::Utf8Value(info[0]);
+    std::string language = *Nan::Utf8String(info[0]);
     std::string directory = ".";
     if (info.Length() > 1) {
-      directory = *String::Utf8Value(info[1]);
+      directory = *Nan::Utf8String(info[1]);
     }
 
     bool result = that->impl->SetDictionary(language, directory);
@@ -47,7 +47,7 @@ class Spellchecker : public Nan::ObjectWrap {
     }
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
-    std::string word = *String::Utf8Value(info[0]);
+    std::string word = *Nan::Utf8String(info[0]);
 
     info.GetReturnValue().Set(Nan::New(that->impl->IsMisspelled(word)));
   }
@@ -117,7 +117,7 @@ class Spellchecker : public Nan::ObjectWrap {
     }
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
-    std::string word = *String::Utf8Value(info[0]);
+    std::string word = *Nan::Utf8String(info[0]);
 
     that->impl->Add(word);
     return;
@@ -130,7 +130,7 @@ class Spellchecker : public Nan::ObjectWrap {
     }
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
-    std::string word = *String::Utf8Value(info[0]);
+    std::string word = *Nan::Utf8String(info[0]);
 
     that->impl->Remove(word);
     return;
@@ -144,7 +144,7 @@ class Spellchecker : public Nan::ObjectWrap {
 
     std::string path = ".";
     if (info.Length() > 0) {
-      std::string path = *String::Utf8Value(info[0]);
+      std::string path = *Nan::Utf8String(info[0]);
     }
 
     std::vector<std::string> dictionaries =
@@ -167,7 +167,7 @@ class Spellchecker : public Nan::ObjectWrap {
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
 
-    std::string word = *String::Utf8Value(info[0]);
+    std::string word = *Nan::Utf8String(info[0]);
     std::vector<std::string> corrections =
       that->impl->GetCorrectionsForMisspelling(word);
 

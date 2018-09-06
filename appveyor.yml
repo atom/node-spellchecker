@@ -1,13 +1,14 @@
 environment:
-  nodejs_version: "6"
-
   matrix:
-    - {}
-    - {SPELLCHECKER_PREFER_HUNSPELL: true}
+    - nodejs_version: '10'
+    - nodejs_version: '10'
+      SPELLCHECKER_PREFER_HUNSPELL: true
+    - nodejs_version: '8'
+    - nodejs_version: '6'
 
 install:
   - ps: Install-Product node $env:nodejs_version
-  - npm --msvs_version=2013 install
+  - npm --msvs_version=2015 install
 
 test_script:
   - node --version
