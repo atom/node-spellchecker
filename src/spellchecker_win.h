@@ -31,6 +31,7 @@ public:
   WindowsSpellchecker();
   ~WindowsSpellchecker();
 
+  bool IsHunspell();
   bool SetDictionary(const std::string& language, const std::string& path);
   std::vector<std::string> GetAvailableDictionaries(const std::string& path);
 

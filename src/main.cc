@@ -1,5 +1,6 @@
 #include <vector>
 #include <utility>
+#include <cstdlib>
 #include "nan.h"
 #include "spellchecker.h"
 #include "worker.h"
@@ -15,7 +16,15 @@ class Spellchecker : public Nan::ObjectWrap {
 
   static NAN_METHOD(New) {
     Nan::HandleScope scope;
-    Spellchecker* that = new Spellchecker();
+    Spellchecker* that;
+
+    if(info.Length() < 1) {
+      unsetenv("SPELLCHECKER_PREFER_HUNSPELL");
+    } else {
+      setenv("SPELLCHECKER_PREFER_HUNSPELL","true",1);
+    }
+
+    that = new Spellchecker();
     that->Wrap(info.This());
 
     info.GetReturnValue().Set(info.This());
@@ -37,6 +46,14 @@ class Spellchecker : public Nan::ObjectWrap {
     }
 
     bool result = that->impl->SetDictionary(language, directory);
+    info.GetReturnValue().Set(Nan::New(result));
+  }
+
+  static NAN_METHOD(IsHunspell) {
+    Nan::HandleScope scope;
+
+    Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
+    bool result = that->impl->IsHunspell();
     info.GetReturnValue().Set(Nan::New(result));
   }
 
@@ -198,6 +215,7 @@ class Spellchecker : public Nan::ObjectWrap {
     tpl->SetClassName(Nan::New<String>("Spellchecker").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
+    Nan::SetPrototypeMethod(tpl, "isHunspell", Spellchecker::IsHunspell);
     Nan::SetPrototypeMethod(tpl, "setDictionary", Spellchecker::SetDictionary);
     Nan::SetPrototypeMethod(tpl, "getAvailableDictionaries", Spellchecker::GetAvailableDictionaries);
     Nan::SetPrototypeMethod(tpl, "getCorrectionsForMisspelling", Spellchecker::GetCorrectionsForMisspelling);

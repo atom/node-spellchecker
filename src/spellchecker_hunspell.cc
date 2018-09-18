@@ -18,6 +18,10 @@ HunspellSpellchecker::~HunspellSpellchecker() {
   }
 }
 
+bool HunspellSpellchecker::IsHunspell() {
+  return false;
+}
+
 bool HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
   if (hunspell) {
     delete hunspell;

@@ -213,6 +213,10 @@ bool WindowsSpellchecker::IsSupported() {
   return !(g_COMFailed || (this->spellcheckerFactory == NULL));
 }
 
+bool WindowsSpellchecker::IsHunspell() {
+  return false;
+}
+
 bool WindowsSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
   if (!this->spellcheckerFactory) {
     return false;

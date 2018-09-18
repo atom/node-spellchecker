@@ -44,6 +44,8 @@ public:
   // Returns true if the word is misspelled.
   virtual bool IsMisspelled(const std::string& word) = 0;
 
+  virtual bool IsHunspell() = 0;
+
   virtual std::vector<MisspelledRange> CheckSpelling(const uint16_t *text, size_t length) = 0;
 
   // Adds a new word to the dictionary.

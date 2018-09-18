@@ -18,6 +18,10 @@ MacSpellchecker::~MacSpellchecker() {
   this->spellCheckerLanguage = nil;
 }
 
+bool MacSpellchecker::IsHunspell() {
+  return false;
+}
+
 bool MacSpellchecker::SetDictionary(const std::string& language, const std::string& path) {
   @autoreleasepool {
     [this->spellCheckerLanguage release];
