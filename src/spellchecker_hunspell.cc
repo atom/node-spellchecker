@@ -19,7 +19,7 @@ HunspellSpellchecker::~HunspellSpellchecker() {
 }
 
 bool HunspellSpellchecker::IsHunspell() {
-  return false;
+  return true;
 }
 
 bool HunspellSpellchecker::SetDictionary(const std::string& language, const std::string& dirname) {
