@@ -19,9 +19,17 @@ class Spellchecker : public Nan::ObjectWrap {
     Spellchecker* that;
 
     if(info.Length() < 1) {
+      #ifdef _WIN32
+      _putenv( "SPELLCHECKER_PREFER_HUNSPELL=" );
+      #else
       unsetenv("SPELLCHECKER_PREFER_HUNSPELL");
+      #endif
     } else {
+      #ifdef _WIN32
+      _putenv_s("SPELLCHECKER_PREFER_HUNSPELL","true");
+      #else
       setenv("SPELLCHECKER_PREFER_HUNSPELL","true",1);
+      #endif
     }
 
     that = new Spellchecker();
