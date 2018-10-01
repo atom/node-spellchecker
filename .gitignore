@@ -4,3 +4,8 @@ node_modules/
 npm-debug.log
 
 package-lock.json
+
+prebuilds/
+iojs-*/
+8.*/
+6.*/

@@ -7,6 +7,13 @@ os:
   - linux
   - osx
 
+services:
+  - docker
+
+cache:
+  directories:
+  - node_modules
+
 install:
   - rm -rf ~/.nvm
   - git clone https://github.com/creationix/nvm.git ~/.nvm
@@ -15,16 +22,16 @@ install:
   - node --version
   - npm install
 
-script: npm test
+script:
+  - npm test
+  - npm run prebuild-node
+  - npm run prebuild-electron
+  - if [[ -n "$TRAVIS_TAG" ]]; then npm run upload; fi
 
-sudo: false
+sudo: required
 
 git:
   depth: 10
-
-branches:
-  only:
-    - master
 
 env:
   global:

@@ -12,14 +12,28 @@
     "url": "https://github.com/atom/node-spellchecker/issues"
   },
   "homepage": "http://atom.github.io/node-spellchecker",
+  "files": [
+    "lib",
+    "src",
+    "vendor",
+    "binding.gyp"
+  ],
   "scripts": {
-    "test": "jasmine-focused --captureExceptions --coffee spec/"
+    "install": "prebuild-install || node-gyp rebuild",
+    "test": "jasmine-focused --captureExceptions --coffee spec/",
+    "prebuild-node": "prebuild -t 8.9.0 -t 9.4.0 -t 10.11.0 -t 11.9.0 -t 12.0.0 --strip",
+    "prebuild-node-ia32": "prebuild -t 8.9.0 -t 9.4.0 -a ia32 --strip",
+    "prebuild-electron": "prebuild -t 4.0.4 -t 5.0.0 -t 6.0.0 -r electron --strip",
+    "prebuild-electron-ia32": "prebuild -t 4.0.4 -t 5.0.0 -t 6.0.0 -r electron -a ia32 --strip",
+    "upload": "node ./script/upload.js"
   },
   "devDependencies": {
-    "jasmine-focused": "^1.0.7"
+    "jasmine-focused": "^1.0.7",
+    "prebuild": "^9.1.0"
   },
   "dependencies": {
     "any-promise": "^1.3.0",
-    "nan": "^2.14.0"
+    "nan": "^2.14.0",
+    "prebuild-install": "^5.3.0"
   }
 }

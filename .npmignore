@@ -6,3 +6,8 @@ spec/
 npm-debug.log
 appveyor.yml
 .travis.yml
+
+prebuilds/
+iojs-*/
+8.*/
+6.*/
