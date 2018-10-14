@@ -19,8 +19,7 @@
   "homepage": "http://atom.github.io/node-spellchecker",
   "scripts": {
     "test": "jasmine-focused --captureExceptions --coffee spec/",
-    "install": "node-gyp rebuild",
-    "postinstall": "python -c 'import shutil;shutil.rmtree(\"vendor//hunspell\", ignore_errors=True);shutil.rmtree(\"src\", ignore_errors=True);'"
+    "install": "node-gyp rebuild"
   },
   "devDependencies": {
     "jasmine-focused": "1.x"
