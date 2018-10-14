@@ -18,14 +18,15 @@
   },
   "homepage": "http://atom.github.io/node-spellchecker",
   "scripts": {
-    "test": "jasmine-focused --captureExceptions --coffee spec/"
+    "test": "jasmine-focused --captureExceptions --coffee spec/",
+    "install": "node-gyp rebuild",
+    "postinstall": "python -c 'import shutil;shutil.rmtree(\"vendor//hunspell\", ignore_errors=True);shutil.rmtree(\"src\", ignore_errors=True);'"
   },
   "devDependencies": {
     "jasmine-focused": "1.x"
   },
   "dependencies": {
     "cld": "2.4.8",
-    "any-promise": "^1.3.0",
     "nan": "^2.10.0"
   }
 }
