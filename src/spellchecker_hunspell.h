@@ -24,6 +24,8 @@ public:
 private:
   Hunspell* hunspell;
   Transcoder *transcoder;
+  Transcoder *toDictionaryTranscoder;
+  Transcoder *fromDictionaryTranscoder;
 };
 
 }  // namespace spellchecker

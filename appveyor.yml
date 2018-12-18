@@ -13,6 +13,7 @@ install:
 test_script:
   - node --version
   - npm --version
+  - ps: Write-Host $env:SPELLCHECKER_PREFER_HUNSPELL
   - npm test
 
 build: off
