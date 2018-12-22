@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <stdlib.h>
 #include "transcoder.h"
+#include "buffers.h"
 
 namespace spellchecker {
 
@@ -144,7 +145,9 @@ void FreeTranscoder(Transcoder *transcoder) {
 bool TranscodeUTF16ToUTF8(const Transcoder *transcoder, char *out, size_t out_length, const uint16_t *in, size_t in_length) {
   int length = WideCharToMultiByte(CP_UTF8, 0, reinterpret_cast<const wchar_t *>(in), in_length, out, out_length, NULL, NULL);
   out[length] = '\0';
-  return true;
+
+  // Make sure the transcoded length doesn't exceed our buffers.
+  return strlen(out) <= MAX_UTF8_BUFFER;
 }
 
 bool Transcode8to8(const Transcoder *transcoder, char *out, size_t out_length, const char *in, size_t in_length) {
@@ -155,28 +158,28 @@ bool Transcode8to8(const Transcoder *transcoder, char *out, size_t out_length, c
     // Copy the string and add the terminating character.
     std::memcpy(out, in, in_length);
     out[in_length] = '\0';
-    return true;
+  } else {
+    // There is no easy way to convert from these two formats, so we convert from
+    // the input format into UTF-16 (wstring) first which appears to be the "right"
+    // way of doing this.
+    std::vector<wchar_t> utf16_buffer(256);
+    int utf16_length;
+
+    if (transcoder->from_code_page < 0) {
+      return false;
+    }
+
+    utf16_length = MultiByteToWideChar(transcoder->from_code_page, 0, in, in_length, (LPWSTR)utf16_buffer.data(), utf16_buffer.size());
+
+    // From the UTF-16 string, we convert it into our new page.
+    // With the outgoing format, we need to convert it into something from the
+    // wstring.
+    int length = WideCharToMultiByte(transcoder->to_code_page, 0, reinterpret_cast<const wchar_t *>(utf16_buffer.data()), utf16_length, out, out_length, NULL, NULL);
+    out[length] = '\0';
   }
 
-  // There is no easy way to convert from these two formats, so we convert from
-  // the input format into UTF-16 (wstring) first which appears to be the "right"
-  // way of doing this.
-  std::vector<wchar_t> utf16_buffer(256);
-  int utf16_length;
-
-  if (transcoder->from_code_page < 0) {
-    return false;
-  }
-
-  utf16_length = MultiByteToWideChar(transcoder->from_code_page, 0, in, in_length, (LPWSTR)utf16_buffer.data(), utf16_buffer.size());
-
-  // From the UTF-16 string, we convert it into our new page.
-  // With the outgoing format, we need to convert it into something from the
-  // wstring.
-  int length = WideCharToMultiByte(transcoder->to_code_page, 0, reinterpret_cast<const wchar_t *>(utf16_buffer.data()), utf16_length, out, out_length, NULL, NULL);
-  out[length] = '\0';
-
-  return true;
+  // Make sure the transcoded length doesn't exceed our buffers.
+  return strlen(out) <= MAX_UTF8_BUFFER;
 }
 
 }  // namespace spellchecker

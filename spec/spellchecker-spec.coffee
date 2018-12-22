@@ -25,6 +25,28 @@ else
   spellType = 'hunspell'
   spellIndex = 0
 
+# Because we are dealing with C++ and buffers, we want
+# to make sure the user doesn't pass in a string that
+# causes a buffer overrun. We limit our buffers to
+# 256 characters (64-character word in UTF-8).
+maximumLength1Byte = 'a'.repeat(256)
+maximumLength2Byte = 'ö'.repeat(128)
+maximumLength3Byte = 'ऐ'.repeat(85)
+maximumLength4Byte = '𐅐'.repeat(64)
+invalidLength1Byte = maximumLength1Byte + 'a'
+invalidLength2Byte = maximumLength2Byte + 'ö'
+invalidLength3Byte = maximumLength3Byte + 'ऐ'
+invalidLength4Byte = maximumLength4Byte + '𐄇'
+
+maximumLength1BytePair = [maximumLength1Byte, maximumLength1Byte].join " "
+maximumLength2BytePair = [maximumLength2Byte, maximumLength2Byte].join " "
+maximumLength3BytePair = [maximumLength3Byte, maximumLength3Byte].join " "
+maximumLength4BytePair = [maximumLength4Byte, maximumLength4Byte].join " "
+invalidLength1BytePair = [invalidLength1Byte, invalidLength1Byte].join " "
+invalidLength2BytePair = [invalidLength2Byte, invalidLength2Byte].join " "
+invalidLength3BytePair = [invalidLength3Byte, invalidLength3Byte].join " "
+invalidLength4BytePair = [invalidLength4Byte, invalidLength4Byte].join " "
+
 describe 'SpellChecker', ->
   describe '.setDictionary', ->
     beforeEach ->
@@ -34,7 +56,7 @@ describe 'SpellChecker', ->
       @fixture.setDictionary('en_US', dictionaryDirectory)
 
     it 'returns true for de_DE_frami', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
@@ -63,7 +85,7 @@ describe 'SpellChecker', ->
       expect(@fixture.isMisspelled('cheese')).toBe false
 
     it 'returns true if Latin German word is misspelled with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
@@ -74,7 +96,7 @@ describe 'SpellChecker', ->
       expect(@fixture.isMisspelled('Kine')).toBe true
 
     it 'returns false if Latin German word is not misspelled with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
@@ -85,7 +107,7 @@ describe 'SpellChecker', ->
       expect(@fixture.isMisspelled('Nacht')).toBe false
 
     it 'returns true if Unicode German word is misspelled with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
@@ -96,7 +118,7 @@ describe 'SpellChecker', ->
       expect(@fixture.isMisspelled('möchtzn')).toBe true
 
     it 'returns false if Unicode German word is not misspelled with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
@@ -108,6 +130,43 @@ describe 'SpellChecker', ->
 
     it 'throws an exception when no word specified', ->
       expect(-> @fixture.isMisspelled()).toThrow()
+
+    it 'returns true for a string of 256 1-byte characters', ->
+      if process.platform is 'linux'
+        expect(@fixture.isMisspelled(maximumLength1Byte)).toBe true
+
+    it 'returns true for a string of 128 2-byte characters', ->
+      if process.platform is 'linux'
+        expect(@fixture.isMisspelled(maximumLength2Byte)).toBe true
+
+    it 'returns true for a string of 85 3-byte characters', ->
+      if process.platform is 'linux'
+        expect(@fixture.isMisspelled(maximumLength3Byte)).toBe true
+
+    it 'returns true for a string of 64 4-byte characters', ->
+      if process.platform is 'linux'
+        expect(@fixture.isMisspelled(maximumLength4Byte)).toBe true
+
+    it 'returns false for a string of 257 1-byte characters', ->
+      if process.platform is 'linux'
+        expect(@fixture.isMisspelled(invalidLength1Byte)).toBe false
+
+    it 'returns false for a string of 65 2-byte characters', ->
+      if process.platform is 'linux'
+        expect(@fixture.isMisspelled(invalidLength2Byte)).toBe false
+
+    it 'returns false for a string of 86 3-byte characters', ->
+      if process.platform is 'linux'
+        expect(@fixture.isMisspelled(invalidLength3Byte)).toBe false
+
+    it 'returns false for a string of 65 4-byte characters', ->
+      if process.platform is 'linux'
+        expect(@fixture.isMisspelled(invalidLength4Byte)).toBe false
+
+  describe '.checkSpelling(string)', ->
+    beforeEach ->
+      @fixture = new Spellchecker()
+      @fixture.setDictionary defaultLanguage, dictionaryDirectory
 
     it 'automatically detects languages on OS X', ->
       return unless process.platform is 'darwin'
@@ -122,7 +181,7 @@ describe 'SpellChecker', ->
       expect(@fixture.checkSpelling(deDE)).not.toEqual []
       expect(@fixture.checkSpelling(frFR)).not.toEqual []
 
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       if spellType is 'hunspell'
         if @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
           expect(@fixture.checkSpelling(enUS)).not.toEqual []
@@ -140,11 +199,6 @@ describe 'SpellChecker', ->
         expect(@fixture.checkSpelling(deDE)).not.toEqual []
         expect(@fixture.checkSpelling(frFR)).toEqual []
 
-  describe '.checkSpelling(string)', ->
-    beforeEach ->
-      @fixture = new Spellchecker()
-      @fixture.setDictionary defaultLanguage, dictionaryDirectory
-
     it 'returns an array of character ranges of misspelled words', ->
       string = 'cat caat dog dooog'
 
@@ -154,7 +208,7 @@ describe 'SpellChecker', ->
       ]
 
     it 'returns an array of character ranges of misspelled German words with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
@@ -226,6 +280,126 @@ describe 'SpellChecker', ->
       expect(-> fixture.checkSpelling(null)).toThrow('Bad argument')
       expect(-> fixture.checkSpelling({})).toThrow('Bad argument')
 
+    it 'returns values for a pair of 256 1-byte character strings', ->
+      if process.platform is 'linux'
+        expect(@fixture.checkSpelling(maximumLength1BytePair)).toEqual [
+          {start: 0, end: 256},
+          {start: 257, end: 513},
+        ]
+
+    it 'returns values for a string of 128 2-byte character strings', ->
+      if process.platform is 'linux'
+        expect(@fixture.checkSpelling(maximumLength2BytePair)).toEqual [
+          {start: 0, end: 128},
+          {start: 129, end: 257},
+        ]
+
+    it 'returns values for a string of 85 3-byte character strings', ->
+      if process.platform is 'linux'
+        expect(@fixture.checkSpelling(maximumLength3BytePair)).toEqual [
+          {start: 0, end: 85},
+          {start: 86, end: 171},
+        ]
+
+    # xit 'returns values for a string of 64 4-byte character strings', ->
+    #   # Linux doesn't seem to handle 4-byte encodings
+    #   expect(@fixture.checkSpelling(maximumLength4BytePair)).toEqual [
+    #     {start: 0, end: 128},
+    #     {start: 129, end: 257},
+    #   ]
+
+    it 'returns nothing for a pair of 257 1-byte character strings', ->
+      if process.platform is 'linux'
+        expect(@fixture.checkSpelling(invalidLength1BytePair)).toEqual []
+
+    it 'returns nothing for a pair of 129 2-byte character strings', ->
+      if process.platform is 'linux'
+        expect(@fixture.checkSpelling(invalidLength2BytePair)).toEqual []
+
+    it 'returns nothing for a pair of 86 3-byte character strings', ->
+      if process.platform is 'linux'
+        expect(@fixture.checkSpelling(invalidLength3BytePair)).toEqual []
+
+    it 'returns nothing for a pair of 65 4-byte character strings', ->
+      if process.platform is 'linux'
+        expect(@fixture.checkSpelling(invalidLength4BytePair)).toEqual []
+
+    it 'returns values for a pair of 256 1-byte character strings with encoding', ->
+      if process.platform is 'linux'
+        # de_DE_frami is invalid outside of Hunspell dictionaries.
+        return unless spellType is 'hunspell'
+
+        @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
+        expect(@fixture.checkSpelling(maximumLength1BytePair)).toEqual [
+          {start: 0, end: 256},
+          {start: 257, end: 513},
+        ]
+
+    it 'returns values for a string of 128 2-byte character strings with encoding', ->
+      if process.platform is 'linux'
+        # de_DE_frami is invalid outside of Hunspell dictionaries.
+        return unless spellType is 'hunspell'
+
+        @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
+        expect(@fixture.checkSpelling(maximumLength2BytePair)).toEqual [
+          {start: 0, end: 128},
+          {start: 129, end: 257},
+        ]
+
+    it 'returns values for a string of 85 3-byte character strings with encoding', ->
+      if process.platform is 'linux'
+        # de_DE_frami is invalid outside of Hunspell dictionaries.
+        return unless spellType is 'hunspell'
+
+        @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
+        @fixture.checkSpelling(invalidLength3BytePair)
+
+    #it 'returns values for a string of 64 4-byte character strings with encoding', ->
+    #  # Linux doesn't seem to handle 4-byte encodings
+    #  # de_DE_frami is invalid outside of Hunspell dictionaries.
+    #  return unless spellType is 'hunspell'
+
+    #  @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
+    #  expect(@fixture.checkSpelling(maximumLength4BytePair)).toEqual [
+    #    {start: 0, end: 128},
+    #    {start: 129, end: 257},
+    #  ]
+
+    it 'returns nothing for a pair of 257 1-byte character strings with encoding', ->
+      if process.platform is not 'linux'
+        # de_DE_frami is invalid outside of Hunspell dictionaries.
+        return unless spellType is 'hunspell'
+
+        @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
+        expect(@fixture.checkSpelling(maximumLength2BytePair)).toEqual []
+
+    it 'returns nothing for a pair of 129 2-byte character strings with encoding', ->
+      return if process.platform is not 'linux'
+      # We are only testing for allocation errors.
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
+      return unless spellType is 'hunspell'
+
+      @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
+      @fixture.checkSpelling(invalidLength2BytePair)
+
+    it 'returns nothing for a pair of 86 3-byte character strings with encoding', ->
+      return if process.platform is not 'linux'
+      # We are only testing for allocation errors.
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
+      return unless spellType is 'hunspell'
+
+      @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
+      @fixture.checkSpelling(invalidLength3BytePair)
+
+    it 'returns nothing for a pair of 65 4-byte character strings with encoding', ->
+      return if process.platform is not 'linux'
+      # We are only testing for allocation errors.
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
+      return unless spellType is 'hunspell'
+
+      @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
+      @fixture.checkSpelling(invalidLength4BytePair)
+
   describe '.checkSpellingAsync(string)', ->
     beforeEach ->
       @fixture = new Spellchecker()
@@ -271,7 +445,7 @@ describe 'SpellChecker', ->
       expect(corrections[0]).toEqual(correction)
 
     it 'returns an array of possible corrections for a correct Latin German word with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
@@ -288,7 +462,7 @@ describe 'SpellChecker', ->
       expect(corrections[0]).toEqual(correction)
 
     it 'returns an array of possible corrections for a incorrect Latin German word with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
@@ -311,7 +485,7 @@ describe 'SpellChecker', ->
         expect(corrections[0]).toEqual(correction)
 
     it 'returns an array of possible corrections for correct Unicode German word with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
@@ -328,7 +502,7 @@ describe 'SpellChecker', ->
       expect(corrections[0]).toEqual(correction)
 
     it 'returns an array of possible corrections for incorrect Unicode German word with ISO8859-1 file', ->
-      # de_DE_frami is invalid outside of Hunspell dictionaries
+      # de_DE_frami is invalid outside of Hunspell dictionaries.
       return unless spellType is 'hunspell'
 
       expect(@fixture.setDictionary('de_DE_frami', dictionaryDirectory)).toBe true
