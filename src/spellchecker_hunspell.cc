@@ -95,7 +95,7 @@ bool HunspellSpellchecker::IsMisspelled(const std::string& word) {
 
   // If we have a dictionary transcoder, then we need to transcode
   // the input into the encoding the dictionary requires.
-  std::vector<char> dict_buffer(MAX_UTF8_TO_UTF8_BUFFER);
+  std::vector<char> dict_buffer(MAX_TRANSCODE_BUFFER);
   bool converted = Transcode8to8(toDictionaryTranscoder, dict_buffer.data(), dict_buffer.size(), word.data(), word.size());
 
   if (!converted) {
@@ -156,7 +156,7 @@ std::vector<MisspelledRange> HunspellSpellchecker::CheckSpelling(const uint16_t 
 
           if (converted) {
             // Convert the buffer into a dictionary-specific encoding.
-            std::vector<char> dict_buffer(MAX_UTF8_TO_UTF8_BUFFER);
+            std::vector<char> dict_buffer(MAX_TRANSCODE_BUFFER);
             converted = Transcode8to8(toDictionaryTranscoder, dict_buffer.data(), dict_buffer.size(), utf8_buffer.data(), utf8_buffer.size());
 
             if (converted) {
@@ -196,7 +196,7 @@ std::vector<std::string> HunspellSpellchecker::GetCorrectionsForMisspelling(cons
 
   if (hunspell) {
     // Convert the buffer into a dictionary-specific encoding.
-    std::vector<char> dict_buffer(MAX_UTF8_TO_UTF8_BUFFER);
+    std::vector<char> dict_buffer(MAX_TRANSCODE_BUFFER);
     bool converted = Transcode8to8(toDictionaryTranscoder, dict_buffer.data(), dict_buffer.size(), word.data(), word.size());
 
     if (converted) {

@@ -301,8 +301,9 @@ describe 'SpellChecker', ->
           {start: 86, end: 171},
         ]
 
+    # # Linux doesn't seem to handle 4-byte encodings, so this test is just to
+    # # comment that fact.
     # xit 'returns values for a string of 64 4-byte character strings', ->
-    #   # Linux doesn't seem to handle 4-byte encodings
     #   expect(@fixture.checkSpelling(maximumLength4BytePair)).toEqual [
     #     {start: 0, end: 128},
     #     {start: 129, end: 257},
@@ -354,8 +355,8 @@ describe 'SpellChecker', ->
         @fixture.setDictionary('de_DE_frami', dictionaryDirectory)
         @fixture.checkSpelling(invalidLength3BytePair)
 
+    # # Linux doesn't seem to handle 4-byte encodings
     #it 'returns values for a string of 64 4-byte character strings with encoding', ->
-    #  # Linux doesn't seem to handle 4-byte encodings
     #  # de_DE_frami is invalid outside of Hunspell dictionaries.
     #  return unless spellType is 'hunspell'
 
