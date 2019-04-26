@@ -25,7 +25,7 @@ Main features of Hunspell spell checker and morphological analyzer:
 - Support language specific features (for example, special casing of
   Azeri and Turkish dotted i, or German sharp s)
 
-- Handle conditional affixes, circumfixes, fogemorphemes,
+- Local conditional affixes, circumfixes, fogemorphemes,
   forbidden words, pseudoroots and homonyms.
 
 - Free software (LGPL, GPL, MPL tri-license)
