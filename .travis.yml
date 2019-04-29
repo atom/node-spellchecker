@@ -30,4 +30,5 @@ env:
   global:
     - CC=clang CXX=clang++ npm_config_clang=1
   matrix:
-    - NODE_VERSION=node
+    - NODE_VERSION=8.9.3
+    - NODE_VERSION=10
