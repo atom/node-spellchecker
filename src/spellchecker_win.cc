@@ -401,13 +401,19 @@ uv_mutex_t &WindowsSpellchecker::GetGlobalTableMutex()
   return this->gTableMutex;
 }
 
-SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker() {
-  WindowsSpellchecker* ret = new WindowsSpellchecker();
-  if (ret->IsSupported() && getenv("SPELLCHECKER_PREFER_HUNSPELL") == NULL) {
-    return ret;
+SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker(int spellcheckerType) {
+  bool preferHunspell = getenv("SPELLCHECKER_PREFER_HUNSPELL") && spellcheckerType != ALWAYS_USE_SYSTEM;
+
+  if (spellcheckerType != ALWAYS_USE_HUNSPELL && !preferHunspell) {
+    WindowsSpellchecker* ret = new WindowsSpellchecker();
+
+    if (ret->IsSupported()) {
+      return ret;
+    }
+
+    delete ret;
   }
 
-  delete ret;
   return new HunspellSpellchecker();
 }
 
