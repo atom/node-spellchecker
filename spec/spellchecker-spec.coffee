@@ -34,7 +34,7 @@ spellType = null
 spellIndex = null
 
 for testAlwaysUseHunspell in [true, false]
-  fdescribe 'SpellChecker', ->
+  describe 'SpellChecker', ->
     describe '.setDictionary', ->
       beforeEach ->
         @fixture = buildSpellChecker()
