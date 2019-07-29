@@ -8,6 +8,10 @@
 
 namespace spellchecker {
 
+const int USE_SYSTEM_DEFAULTS = 0;
+const int ALWAYS_USE_SYSTEM = 1;
+const int ALWAYS_USE_HUNSPELL = 2;
+
 struct MisspelledRange {
   size_t start;
   size_t end;
@@ -66,7 +70,7 @@ public:
 
 class SpellcheckerFactory {
 public:
-  static SpellcheckerImplementation* CreateSpellchecker();
+  static SpellcheckerImplementation* CreateSpellchecker(int spellcheckerType);
 };
 
 inline std::vector<MisspelledRange> SpellcheckerThreadView::CheckSpelling(const uint16_t *text, size_t length)
