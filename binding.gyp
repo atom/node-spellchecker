@@ -7,6 +7,9 @@
       ['OS=="linux"', {
         'spellchecker_use_hunspell': 'true',
       }],
+      ['OS=="freebsd"', {
+        'spellchecker_use_hunspell': 'true',
+      }],
       ['OS=="win"', {
         'spellchecker_use_hunspell': 'true',
       }],
@@ -54,6 +57,12 @@
           ],
         }],
         ['OS=="linux"', {
+          'sources': [
+             'src/spellchecker_linux.cc',
+             'src/transcoder_posix.cc',
+          ],
+        }],
+        ['OS=="freebsd"', {
           'sources': [
              'src/spellchecker_linux.cc',
              'src/transcoder_posix.cc',
