@@ -1,32 +1,44 @@
-image: Visual Studio 2017
-platform:
-  - x64
-
-cache:
-  - node_modules
-
 environment:
   matrix:
-    - nodejs_version: '10'
-    - nodejs_version: '10'
-      SPELLCHECKER_PREFER_HUNSPELL: true
     - nodejs_version: '8'
+    - nodejs_version: '10'
+    - nodejs_version: '12'
+      SPELLCHECKER_PREFER_HUNSPELL: true
+    - nodejs_version: '12'
+      DO_PREBUILD: true
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
   - npm --msvs_version=2015 install
 
-build_script:
+test_script:
   - node --version
   - npm --version
   - ps: Write-Host $env:SPELLCHECKER_PREFER_HUNSPELL
   - npm test
-  - if "%nodejs_version%"=="10" if not defined SPELLCHECKER_PREFER_HUNSPELL if defined APPVEYOR_REPO_TAG_NAME (set DO_PREBUILD=1)
+
+#
+# We have our deployment set up to run on the master branch or tags (via the
+# for: config) and our DO_PREBUILD job (via environment variable checks), and
+# only run the upload step on tag builds (also via an environment variable
+# check). We set it up this way so master builds will always check that
+# the prebuilding is successful, and we don't end up with a nasty build failure
+# surprise *after* having already tagged a build.
+#
+for:
+  -
+    branches:
+      except:
+        - /^(master|v\d+\.\d+(\.\d+)?(-\S*)?)$/
+    deploy: off
+
+before_deploy:
   - if defined DO_PREBUILD (npm run prebuild-node)
   - if defined DO_PREBUILD (npm run prebuild-node-ia32)
   - if defined DO_PREBUILD (npm run prebuild-electron)
   - if defined DO_PREBUILD (npm run prebuild-electron-ia32)
-  - if defined DO_PREBUILD (npm run upload)
 
-test: off
-deploy: off
+deploy_script:
+  - if defined DO_PREBUILD if defined APPVEYOR_REPO_TAG_NAME (npm run upload)
+
+build: off
