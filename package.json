@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "cld": "https://github.com/typora/node-cld/archive/master.tar.gz",
-    "nan": "https://github.com/nodejs/nan/archive/master.tar.gz"
+    "nan": "^2.14.0"
   }
 }
