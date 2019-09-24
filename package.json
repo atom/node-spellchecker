@@ -25,7 +25,7 @@
     "jasmine-focused": "1.x"
   },
   "dependencies": {
-    "cld": "https://nyc3.digitaloceanspaces.com/typora-download/build/node-cld.tar",
+    "cld": "git+ssh://git@github.com:typora/node-cld.git",
     "nan": "^2.10.0"
   }
 }
