@@ -96,7 +96,7 @@ class Spellchecker : public Nan::ObjectWrap {
     }
 
     std::vector<uint16_t> text(string->Length() + 1);
-    string->Write(reinterpret_cast<uint16_t *>(text.data()));
+    string->Write(info.GetIsolate(), reinterpret_cast<uint16_t *>(text.data()));
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
     std::vector<MisspelledRange> misspelled_ranges = that->impl->CheckSpelling(text.data(), text.size());
@@ -127,7 +127,7 @@ class Spellchecker : public Nan::ObjectWrap {
     Nan::Callback *callback = new Nan::Callback(info[1].As<Function>());
 
     std::vector<uint16_t> corpus(string->Length() + 1);
-    string->Write(reinterpret_cast<uint16_t *>(corpus.data()));
+    string->Write(info.GetIsolate(), reinterpret_cast<uint16_t *>(corpus.data()));
 
     Spellchecker* that = Nan::ObjectWrap::Unwrap<Spellchecker>(info.Holder());
 
@@ -233,7 +233,9 @@ class Spellchecker : public Nan::ObjectWrap {
     Nan::SetPrototypeMethod(tpl, "add", Spellchecker::Add);
     Nan::SetPrototypeMethod(tpl, "remove", Spellchecker::Remove);
 
-    exports->Set(Nan::New("Spellchecker").ToLocalChecked(), tpl->GetFunction());
+    Isolate* isolate = exports->GetIsolate();
+    Local<Context> context = isolate->GetCurrentContext();
+    exports->Set(Nan::New("Spellchecker").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
   }
 };
 
