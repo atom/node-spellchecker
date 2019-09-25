@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "cld": "git+ssh://git@github.com:typora/node-cld.git",
-    "nan": "^2.10.0"
+    "nan": "^2.14.0"
   }
 }
