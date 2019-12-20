@@ -35,6 +35,7 @@ Transcoder *NewUTF16ToUTF8Transcoder() {
 
 Transcoder *NewTranscoder8to8(const char *from_encoding, const char *to_encoding) {
   iconv_t conversion = iconv_open(to_encoding, from_encoding);
+  
   if (conversion == (iconv_t)-1) {
     return NULL;
   }

@@ -125,7 +125,7 @@ std::vector<MisspelledRange> HunspellSpellchecker::CheckSpelling(const uint16_t 
   // way, we need to make sure our iswalpha works on UTF-8 strings. We picked a
   // generic locale because we don't pass the locale in. Sadly, "C.utf8" doesn't
   // work so we assume that US English is available everywhere.
-  setlocale(LC_CTYPE, "en_US.utf8");
+  setlocale(LC_CTYPE, "en_US.UTF-8");
 
   // Go through the UTF-16 characters and look for breaks.
   for (size_t word_start = 0, i = 0; i < utf16_length; i++) {

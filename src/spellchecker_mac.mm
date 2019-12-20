@@ -154,12 +154,14 @@ void MacSpellchecker::UpdateGlobalSpellchecker() {
   }
 }
 
-SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker() {
-  if (getenv("SPELLCHECKER_PREFER_HUNSPELL")) {
-    return new HunspellSpellchecker();
+SpellcheckerImplementation* SpellcheckerFactory::CreateSpellchecker(int spellcheckerType) {
+  bool preferHunspell = getenv("SPELLCHECKER_PREFER_HUNSPELL") && spellcheckerType != ALWAYS_USE_SYSTEM;
+
+  if (spellcheckerType != ALWAYS_USE_HUNSPELL && !preferHunspell) {
+    return new MacSpellchecker();
   }
 
-  return new MacSpellchecker();
+  return new HunspellSpellchecker();
 }
 
 }  // namespace spellchecker
