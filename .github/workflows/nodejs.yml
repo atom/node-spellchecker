@@ -1,0 +1,31 @@
+name: Node CI
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [8.x, 10.x, 12.x]
+        platform: 
+          - { os: windows-latest, hunspell: true }
+          - { os: windows-latest }
+          - { os: macos-latest, hunspell: true }  
+          - { os: macos-latest }  
+          - { os: ubuntu-latest }
+
+    runs-on: ${{ matrix.platform.os }}
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install, build, and test
+      run: |
+        npm install
+        npm test
+      env:
+        SPELLCHECKER_PREFER_HUNSPELL: ${{ matrix.platform.hunspell }}
