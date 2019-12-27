@@ -1,0 +1,38 @@
+name: Node CI
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [8.x, 10.x, 12.x]
+        platform: 
+          - { os: windows-latest, force-hunspell: true }
+          - { os: windows-latest }
+          - { os: macos-latest, force-hunspell: true }  
+          - { os: macos-latest }  
+          - { os: ubuntu-latest, use-clang: true }
+
+    runs-on: ${{ matrix.platform.os }}
+    env:
+      SPELLCHECKER_PREFER_HUNSPELL: ${{ matrix.platform.hunspell }}
+        
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install, build, and test (clang)
+      if: matrix.platform.use-clang == true
+      run: |
+        export CC="$(which clang)"
+        export CPP="$(which clang++)"
+        npm install
+        npm test
+    - name: npm install, build, and test
+      run: |
+        npm install
+        npm test
