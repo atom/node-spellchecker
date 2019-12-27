@@ -6,7 +6,7 @@
 #include <memory>
 #include <stdint.h>
 
-#if V8_MAJOR_VERSION > 6 && V8_MINOR_VERSION > 2
+#if (V8_MAJOR_VERSION == 7 && V8_MINOR_VERSION > 2) || V8_MAJOR_VERSION > 7
 #define V8_USE_MAYBE
 #endif
 
