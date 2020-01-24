@@ -72,7 +72,7 @@ class Spellchecker : public Nan::ObjectWrap {
       return Nan::ThrowError("Bad argument");
     }
 
-    Handle<String> string = Handle<String>::Cast(info[0]);
+    Local<String> string = Local<String>::Cast(info[0]);
     if (!string->IsString()) {
       return Nan::ThrowError("Bad argument");
     }
@@ -96,9 +96,9 @@ class Spellchecker : public Nan::ObjectWrap {
       uint32_t start = iter->start, end = iter->end;
 
       Local<Object> misspelled_range = Nan::New<Object>();
-      misspelled_range->Set(Nan::New("start").ToLocalChecked(), Nan::New<Integer>(start));
-      misspelled_range->Set(Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
-      result->Set(index, misspelled_range);
+      Nan::Set(misspelled_range, Nan::New("start").ToLocalChecked(), Nan::New<Integer>(start));
+      Nan::Set(misspelled_range, Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
+      Nan::Set(result, index, misspelled_range);
     }
   }
 
@@ -145,7 +145,7 @@ class Spellchecker : public Nan::ObjectWrap {
     Local<Array> result = Nan::New<Array>(dictionaries.size());
     for (size_t i = 0; i < dictionaries.size(); ++i) {
       const std::string& dict = dictionaries[i];
-      result->Set(i, Nan::New(dict.data(), dict.size()).ToLocalChecked());
+      Nan::Set(result, i, Nan::New(dict.data(), dict.size()).ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);
@@ -168,7 +168,7 @@ class Spellchecker : public Nan::ObjectWrap {
       const std::string& word = corrections[i];
 
       Nan::MaybeLocal<String> val = Nan::New<String>(word.data(), word.size());
-      result->Set(i, val.ToLocalChecked());
+      Nan::Set(result, i, val.ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);
@@ -184,7 +184,7 @@ class Spellchecker : public Nan::ObjectWrap {
   }
 
  public:
-  static void Init(Handle<Object> exports) {
+  static void Init(Local<Object> exports) {
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(Spellchecker::New);
 
     tpl->SetClassName(Nan::New<String>("Spellchecker").ToLocalChecked());
@@ -198,12 +198,12 @@ class Spellchecker : public Nan::ObjectWrap {
     Nan::SetMethod(tpl->InstanceTemplate(), "add", Spellchecker::Add);
     Nan::SetMethod(tpl->InstanceTemplate(), "remove", Spellchecker::Remove);
 
-    exports->Set(Nan::New("Spellchecker").ToLocalChecked(), tpl->GetFunction());
+    Nan::Set(exports, Nan::New("Spellchecker").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
   }
 };
 
-void Init(Handle<Object> exports, Handle<Object> module) {
-  Spellchecker::Init(exports);
+NAN_MODULE_INIT(Init) {
+  Spellchecker::Init(target);
 }
 
 }  // namespace
