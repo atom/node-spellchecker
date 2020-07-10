@@ -42,5 +42,6 @@ void CheckSpellingWorker::HandleOKCallback() {
   }
 
   Local<Value> argv[] = { Nan::Null(), result };
-  callback->Call(2, argv);
+  Nan::AsyncResource resource("CheckSpellingWorker::HandleOKCallback");
+  callback->Call(2, argv, &resource);
 }
