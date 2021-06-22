@@ -1,15 +1,12 @@
 {
   'variables': {
     'conditions': [
-      ['OS=="mac"', {
-        'spellchecker_use_hunspell%': 'true',
-      }],
-      ['OS=="linux"', {
-        'spellchecker_use_hunspell': 'true',
-      }],
-      ['OS=="win"', {
-        'spellchecker_use_hunspell': 'true',
-      }],
+      ['OS=="mac"', { 'spellchecker_use_hunspell%': 'true' },
+       'OS=="linux"', { 'spellchecker_use_hunspell': 'true'},
+       'OS=="win"', { 'spellchecker_use_hunspell': 'true' },
+       'OS=="freebsd"', { 'spellchecker_use_hunspell': 'true' },
+       { 'spellchecker_use_hunspell': 'false' }
+      ],
     ],
   },
   'target_defaults': {
