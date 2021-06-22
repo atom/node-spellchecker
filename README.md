@@ -7,6 +7,7 @@ Native bindings to [NSSpellChecker](https://developer.apple.com/library/mac/#doc
 ```bash
 npm install spellchecker
 ```
+**Important**: Must have g++ version greater than 4.6 to succesfully build project. 
 
 ## Using
 
