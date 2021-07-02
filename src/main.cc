@@ -135,9 +135,9 @@ class Spellchecker : public Nan::ObjectWrap {
       uint32_t start = iter->start, end = iter->end;
 
       Local<Object> misspelled_range = Nan::New<Object>();
-      misspelled_range->Set(context, Nan::New("start").ToLocalChecked(), Nan::New<Integer>(start));
-      misspelled_range->Set(context, Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
-      result->Set(context, index, misspelled_range);
+      Nan::Set(misspelled_range, Nan::New("start").ToLocalChecked(), Nan::New<Integer>(start));
+      Nan::Set(misspelled_range, Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
+      Nan::Set(result, index, misspelled_range);
     }
   }
 
@@ -222,7 +222,7 @@ class Spellchecker : public Nan::ObjectWrap {
     Local<Array> result = Nan::New<Array>(dictionaries.size());
     for (size_t i = 0; i < dictionaries.size(); ++i) {
       const std::string& dict = dictionaries[i];
-      result->Set(context, i, Nan::New(dict.data(), dict.size()).ToLocalChecked());
+      Nan::Set(result, i, Nan::New(dict.data(), dict.size()).ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);
@@ -249,7 +249,7 @@ class Spellchecker : public Nan::ObjectWrap {
       const std::string& word = corrections[i];
 
       Nan::MaybeLocal<String> val = Nan::New<String>(word.data(), word.size());
-      result->Set(context, i, val.ToLocalChecked());
+      Nan::Set(result, i, val.ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);

@@ -36,11 +36,12 @@ void CheckSpellingWorker::HandleOKCallback() {
     uint32_t start = iter->start, end = iter->end;
 
     Local<Object> misspelled_range = Nan::New<Object>();
-    misspelled_range->Set(context, Nan::New("start").ToLocalChecked(), Nan::New<Integer>(start));
-    misspelled_range->Set(context, Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
-    result->Set(context, index, misspelled_range);
+    Nan::Set(misspelled_range, Nan::New("start").ToLocalChecked(), Nan::New<Integer>(start));
+    Nan::Set(misspelled_range, Nan::New("end").ToLocalChecked(), Nan::New<Integer>(end));
+    Nan::Set(result, index, misspelled_range);
   }
 
   Local<Value> argv[] = { Nan::Null(), result };
-  callback->Call(2, argv);
+  Nan::AsyncResource resource("CheckSpellingWorker::HandleOKCallback");
+  callback->Call(2, argv, &resource);
 }
