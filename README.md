@@ -1,4 +1,5 @@
-# SpellChecker Node Module [![CI](https://github.com/atom/node-spellchecker/actions/workflows/ci.yml/badge.svg)](https://github.com/atom/node-spellchecker/actions/workflows/ci.yml)
+##### Atom and all repositories under Atom will be archived on December 15, 2022. Learn more in our [official announcement](https://github.blog/2022-06-08-sunsetting-atom/)
+ # SpellChecker Node Module [![CI](https://github.com/atom/node-spellchecker/actions/workflows/ci.yml/badge.svg)](https://github.com/atom/node-spellchecker/actions/workflows/ci.yml)
 
 Native bindings to [NSSpellChecker](https://developer.apple.com/library/mac/#documentation/cocoa/reference/ApplicationKit/Classes/NSSpellChecker_Class/Reference/Reference.html), [Hunspell](http://hunspell.sourceforge.net/), or the [Windows 8 Spell Check API](https://msdn.microsoft.com/en-us/library/windows/desktop/hh869853(v=vs.85).aspx), depending on your platform. Windows 7 and below as well as Linux will rely on Hunspell.
 
